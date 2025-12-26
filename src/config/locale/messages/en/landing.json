@@ -48,25 +48,26 @@
   },
   "hero": {
     "id": "hero",
-    "title": "SubtitleTK: Extract the Essence. Translate the Message. Reach the World",
+    "title": "Read Videos, Don't Just Watch Them",
     "highlight_text": "",
-    "description": "<strong>Supercharge your content reach by turning any YouTube or TikTok video into a global masterpiece with one-click AI subtitling.</strong>",
+    "description": "One-click to get high-quality text and SRT files. No watermark, no hassle, just pure data",
     "announcement": {
       "badge": "New",
       "title": "🎉 Subtitle TK",
       "url": "/pricing"
     },
-    "tip": "",
+    "tip": "<span style=\"font-size: 0.75rem; font-weight: 300;\">No credit card required</span>",
     "buttons": [
       {
-        "title": "Get Started",
+        "title": "Analyze Your First Video Now",
         "icon": "Zap",
         "url": "/pricing",
         "target": "_self",
-        "variant": "default"
+        "variant": "default",
+        "className": "bg-[#FFD700] hover:bg-[#FFC700] text-black font-semibold"
       }
     ],
-    "show_avatars": true,
+    "show_avatars": false,
     "avatars_tip": "999+ users are using Subtitle TK",
     "show_award": false,
     "image": {
@@ -399,12 +400,15 @@
     "id": "cta",
     "title": "Extract the Essence. Translate the Message",
     "description": "Start from here with Subtitle TK.",
+    "tip": "<span style=\"font-size: 0.75rem; font-weight: 300;\">No credit card required</span>",
     "buttons": [
       {
-        "title": "Get Subtitle TK",
-        "url": "https://www.subtitletk.app",
-        "target": "_blank",
-        "icon": "Zap"
+        "title": "Analyze Your First Video Now",
+        "url": "/pricing",
+        "target": "_self",
+        "icon": "Zap",
+        "variant": "default",
+        "className": "bg-[#FFD700] hover:bg-[#FFC700] text-black font-semibold"
       }
     ]
   },

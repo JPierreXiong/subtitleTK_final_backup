@@ -1,6 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { getThemePage } from '@/core/theme';
+import { getApprovedTestimonials } from '@/shared/models/testimonial';
+import {
+  convertTestimonialsToTestimonialsType,
+} from '@/shared/lib/testimonial-helpers';
 import { Landing } from '@/shared/types/blocks/landing';
 
 export default async function LandingPage({
@@ -14,6 +18,33 @@ export default async function LandingPage({
   // load page data
   const t = await getTranslations('landing');
 
+  // Get testimonials from database or fallback to JSON
+  let testimonialsData;
+  try {
+    const dbTestimonials = await getApprovedTestimonials({
+      language: locale || 'en',
+      limit: 100,
+    });
+
+    if (dbTestimonials.length > 0) {
+      // Use database testimonials
+      const jsonTestimonials = t.raw('testimonials') as any;
+      testimonialsData = convertTestimonialsToTestimonialsType(
+        dbTestimonials,
+        jsonTestimonials?.title || 'What Users Say About Subtitle TK',
+        jsonTestimonials?.description || 'Hear from content creators and businesses who transformed their video content with Subtitle TK.',
+        jsonTestimonials?.id || 'testimonials'
+      );
+    } else {
+      // Fallback to JSON file
+      testimonialsData = t.raw('testimonials');
+    }
+  } catch (error) {
+    // On error, fallback to JSON file
+    console.error('Error loading testimonials from database:', error);
+    testimonialsData = t.raw('testimonials');
+  }
+
   // build page params
   const page: Landing = {
     hero: t.raw('hero'),
@@ -25,8 +56,8 @@ export default async function LandingPage({
     features: undefined,
     stats: undefined,
     
-    // 保留：用户评价功能（紧跟在 Hero 后面）
-    testimonials: t.raw('testimonials'),
+    // 隐藏用户评价
+    testimonials: undefined,
     
     // 可选保留的区块
     subscribe: t.raw('subscribe'),

@@ -623,3 +623,42 @@ export const dailyCheckins = pgTable(
     index('idx_daily_checkin_user_date').on(table.userId, table.checkinDate),
   ]
 );
+
+export const testimonial = pgTable(
+  'testimonial',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    email: text('email'),
+    role: text('role'),
+    quote: text('quote').notNull(),
+    avatarUrl: text('avatar_url'),
+    language: text('language').notNull(), // en, zh, fr
+    status: text('status').notNull(), // pending, approved, rejected
+    rating: integer('rating'), // 1-5, optional
+    source: text('source'), // manual, landing, billing
+    sort: integer('sort').default(0).notNull(),
+    approvedAt: timestamp('approved_at'),
+    approvedBy: text('approved_by').references(() => user.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => [
+    // Query testimonials by status (for admin filtering)
+    index('idx_testimonial_status').on(table.status),
+    // Query testimonials by language (for frontend display)
+    index('idx_testimonial_language').on(table.language),
+    // Query testimonials by user (for user's submitted testimonials)
+    index('idx_testimonial_user_id').on(table.userId),
+    // Composite: Query approved testimonials by language and sort (for frontend)
+    index('idx_testimonial_language_status_sort').on(
+      table.language,
+      table.status,
+      table.sort
+    ),
+  ]
+);

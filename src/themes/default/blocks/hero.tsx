@@ -109,7 +109,7 @@ export function Hero({
                   asChild
                   size={button.size || 'default'}
                   variant={button.variant || 'default'}
-                  className="px-4 text-sm"
+                  className={cn("px-4 text-sm", button.className)}
                   key={idx}
                 >
                   <Link
@@ -127,7 +127,7 @@ export function Hero({
           {hero.tip && (
             <motion.p
               {...createFadeInVariant(0.6)}
-              className="text-muted-foreground mt-6 block text-center text-sm"
+              className="text-muted-foreground mt-3 block text-center"
               dangerouslySetInnerHTML={{ __html: hero.tip ?? '' }}
             />
           )}
