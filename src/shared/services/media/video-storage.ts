@@ -75,8 +75,21 @@ export async function getVideoDownloadUrl(
 ): Promise<string> {
   const storageService = await getStorageService();
 
-  // Parse storage identifier
-  const [provider, identifier] = storageIdentifier.split(':', 2);
+  // Parse storage identifier - use indexOf to handle URLs with multiple colons (e.g., https://)
+  // Fix: split(':', 2) would truncate "vercel-blob:https://..." to ["vercel-blob", "https"]
+  const colonIndex = storageIdentifier.indexOf(':');
+  
+  if (colonIndex === -1) {
+    // No prefix, assume it's a legacy format (R2 key)
+    const r2Provider = storageService.getProvider('r2') as R2Provider;
+    if (r2Provider) {
+      return await r2Provider.getPresignedUrl(storageIdentifier, expiresIn);
+    }
+    throw new Error('Storage provider not configured');
+  }
+
+  const provider = storageIdentifier.substring(0, colonIndex);
+  const identifier = storageIdentifier.substring(colonIndex + 1); // Get everything after the first colon
 
   if (provider === 'vercel-blob') {
     // Vercel Blob: identifier is the full URL, return it directly
@@ -88,9 +101,9 @@ export async function getVideoDownloadUrl(
       throw new Error('R2 storage provider is not configured');
     }
     return await r2Provider.getPresignedUrl(identifier, expiresIn);
-  } else if (storageIdentifier.startsWith('original:')) {
+  } else if (provider === 'original') {
     // Original URL (fallback when storage is not configured)
-    return storageIdentifier.replace('original:', '');
+    return identifier;
   } else {
     // Legacy format: assume it's an R2 key
     const r2Provider = storageService.getProvider('r2') as R2Provider;

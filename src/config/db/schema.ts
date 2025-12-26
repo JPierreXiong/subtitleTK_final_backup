@@ -662,3 +662,22 @@ export const testimonial = pgTable(
     ),
   ]
 );
+
+export const videoCache = pgTable(
+  'video_cache',
+  {
+    id: text('id').primaryKey(), // SHA-256 hash of normalized URL
+    originalUrl: text('original_url').notNull(), // Original user input URL
+    downloadUrl: text('download_url').notNull(), // Video download URL from RapidAPI
+    platform: text('platform').notNull(), // 'youtube' | 'tiktok'
+    expiresAt: timestamp('expires_at').notNull(), // Cache expiration time
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    // Index for cache lookup by expiration time (for cleanup queries)
+    index('idx_video_cache_expires').on(table.expiresAt),
+  ]
+);

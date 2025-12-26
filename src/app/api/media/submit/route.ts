@@ -27,6 +27,11 @@ import {
 import { db } from '@/core/db';
 import { user } from '@/config/db/schema';
 import { eq } from 'drizzle-orm';
+import { generateVideoFingerprint } from '@/shared/lib/media-url';
+import {
+  findValidVideoCache,
+  setVideoCache,
+} from '@/shared/models/video_cache';
 
 /**
  * Process media task asynchronously
@@ -48,11 +53,98 @@ async function processMediaTask(
       progress: 10,
     });
 
-    // Step 1: Fetch media data from RapidAPI
-    // Pass outputType to ensure correct API is called
+    // Step 1: Check cache for video download tasks (only for 'video' outputType)
+    if (outputType === 'video') {
+      const fingerprint = generateVideoFingerprint(url);
+      const cached = await findValidVideoCache(fingerprint);
+      
+      if (cached) {
+        // ✅ Cache hit: Completely skip API call
+        console.log(`[Cache Hit] Skipping API call for ${url}, using cached download URL`);
+        
+        // Update progress
+        await updateMediaTaskById(taskId, {
+          progress: 30,
+          platform: cached.platform,
+          // Note: title, author, thumbnailUrl etc. are not set (remain NULL)
+          // Frontend should handle NULL metadata gracefully
+        });
+
+        // Step 1.1: Handle video URL (use cached download URL)
+        await updateMediaTaskById(taskId, {
+          progress: 40,
+        });
+
+        // Determine platform-specific handling
+        let videoUrlInternal: string | null = null;
+        let expiresAt: Date | null = null;
+
+        if (cached.platform === 'tiktok') {
+          // TikTok: Try to upload video to storage (R2 or Vercel Blob)
+          const storageIdentifier = await uploadVideoToStorage(cached.downloadUrl);
+
+          if (storageIdentifier) {
+            // Successfully uploaded to storage
+            videoUrlInternal = storageIdentifier;
+            expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+            await updateMediaTaskById(taskId, {
+              progress: 70,
+            });
+          } else {
+            // Storage not configured or upload failed, use original video URL
+            videoUrlInternal = `original:${cached.downloadUrl}`;
+            expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours for original URLs
+            await updateMediaTaskById(taskId, {
+              progress: 70,
+            });
+            console.log(
+              'Using original video URL (storage not configured or upload failed)'
+            );
+          }
+        } else if (cached.platform === 'youtube') {
+          // YouTube: Use original video URL
+          videoUrlInternal = `original:${cached.downloadUrl}`;
+          expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours for original URLs
+          await updateMediaTaskById(taskId, {
+            progress: 70,
+          });
+          console.log('Using cached YouTube video URL');
+        }
+
+        // Step 1.2: Mark as extracted (ready for download)
+        // Note: subtitleRaw is not set (video download tasks don't need subtitles)
+        await updateMediaTaskById(taskId, {
+          status: 'extracted',
+          progress: 100,
+          videoUrlInternal: videoUrlInternal,
+          expiresAt: expiresAt,
+        });
+
+        // ✅ Early return: Skip API call completely
+        return;
+      }
+    }
+
+    // ❌ Cache miss: Normal API call flow
+    console.log(`[Cache Miss] Fetching from RapidAPI for ${url}`);
     const mediaData = await fetchMediaFromRapidAPI(url, outputType || 'subtitle');
 
-    // Update progress
+    // Step 2: Cache the video download URL if this is a video task
+    if (outputType === 'video' && mediaData.videoUrl) {
+      const fingerprint = generateVideoFingerprint(url);
+      // Set cache asynchronously (don't await to avoid blocking)
+      setVideoCache(fingerprint, {
+        originalUrl: url,
+        downloadUrl: mediaData.videoUrl,
+        platform: mediaData.platform,
+        expiresInHours: 12, // Cache for 12 hours
+      }).catch((error) => {
+        console.error('Failed to cache video URL:', error);
+        // Non-blocking: Continue even if cache fails
+      });
+    }
+
+    // Update progress with metadata
     await updateMediaTaskById(taskId, {
       progress: 30,
       platform: mediaData.platform,
@@ -67,52 +159,62 @@ async function processMediaTask(
       sourceLang: mediaData.sourceLang || 'auto',
     });
 
-    // Step 2: Handle video upload if needed (TikTok + video output type)
+    // Step 3: Handle video upload if needed (TikTok + video output type)
     let videoUrlInternal: string | null = null;
     let expiresAt: Date | null = null;
 
     if (
-      mediaData.platform === 'tiktok' &&
       outputType === 'video' &&
-      mediaData.videoUrl &&
-      mediaData.isTikTokVideo
+      mediaData.videoUrl
     ) {
       await updateMediaTaskById(taskId, {
         progress: 40,
       });
 
-      // Try to upload video to storage (R2 or Vercel Blob)
-      const storageIdentifier = await uploadVideoToStorage(mediaData.videoUrl);
+      if (mediaData.platform === 'tiktok' && mediaData.isTikTokVideo) {
+        // TikTok: Try to upload video to storage (R2 or Vercel Blob)
+        const storageIdentifier = await uploadVideoToStorage(mediaData.videoUrl);
 
-      if (storageIdentifier) {
-        // Successfully uploaded to storage
-        videoUrlInternal = storageIdentifier;
-        expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-        await updateMediaTaskById(taskId, {
-          progress: 70,
-        });
-      } else {
-        // Storage not configured or upload failed, use original video URL
+        if (storageIdentifier) {
+          // Successfully uploaded to storage
+          videoUrlInternal = storageIdentifier;
+          expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+          await updateMediaTaskById(taskId, {
+            progress: 70,
+          });
+        } else {
+          // Storage not configured or upload failed, use original video URL
+          // Store original URL with a special prefix to indicate it's not in storage
+          videoUrlInternal = `original:${mediaData.videoUrl}`;
+          // Note: Original URLs from TikTok may expire, so set a shorter expiration
+          expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours for original URLs
+          await updateMediaTaskById(taskId, {
+            progress: 70,
+          });
+          console.log(
+            'Using original video URL (storage not configured or upload failed)'
+          );
+        }
+      } else if (mediaData.platform === 'youtube') {
+        // YouTube: Use original video URL (YouTube videos are typically larger and may not need storage)
         // Store original URL with a special prefix to indicate it's not in storage
         videoUrlInternal = `original:${mediaData.videoUrl}`;
-        // Note: Original URLs from TikTok may expire, so set a shorter expiration
+        // YouTube video URLs may expire, set expiration time
         expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours for original URLs
         await updateMediaTaskById(taskId, {
           progress: 70,
         });
-        console.log(
-          'Using original video URL (storage not configured or upload failed)'
-        );
+        console.log('Using original YouTube video URL');
       }
     }
 
-    // Step 3: Save subtitle content
+    // Step 4: Save subtitle content
     await updateMediaTaskById(taskId, {
       progress: 90,
       subtitleRaw: mediaData.subtitleRaw || null,
     });
 
-    // Step 4: Mark as extracted (ready for translation)
+    // Step 5: Mark as extracted (ready for translation)
     await updateMediaTaskById(taskId, {
       status: 'extracted',
       progress: 100,

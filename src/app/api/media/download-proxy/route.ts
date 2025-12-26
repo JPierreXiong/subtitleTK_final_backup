@@ -53,13 +53,9 @@ export async function GET(request: NextRequest) {
     let downloadUrl: string;
 
     try {
-      if (task.videoUrlInternal.startsWith('original:')) {
-        // Original URL
-        downloadUrl = task.videoUrlInternal.replace('original:', '');
-      } else {
-        // Get URL from storage (Vercel Blob or R2)
-        downloadUrl = await getVideoDownloadUrl(task.videoUrlInternal);
-      }
+      // Use getVideoDownloadUrl for all storage formats (including original:)
+      // This ensures consistent URL parsing logic
+      downloadUrl = await getVideoDownloadUrl(task.videoUrlInternal);
     } catch (urlError: any) {
       console.error('Failed to get download URL:', urlError);
       return NextResponse.json(
