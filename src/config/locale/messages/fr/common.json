@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "title": "Subtitle TK Template Two",
+    "description": "Subtitle TK est un modèle NextJS pour créer des startups SaaS IA. Déployez rapidement avec une variété de modèles et de composants.",
+    "keywords": "subtitle tk, subtitle-toolkit, subtitle-tk-demo"
+  },
+  "sign": {
+    "sign_in_title": "Se connecter",
+    "sign_in_description": "Connectez-vous à votre compte",
+    "sign_up_title": "S'inscrire",
+    "sign_up_description": "Créer un compte",
+    "email_title": "E-mail",
+    "email_placeholder": "Entrez votre e-mail ici",
+    "password_title": "Mot de passe",
+    "password_placeholder": "Entrez votre mot de passe ici",
+    "forgot_password": "Mot de passe oublié ?",
+    "or": "Ou",
+    "continue": "Continuer",
+    "no_account": "Vous n'avez pas de compte ?",
+    "already_have_account": "Vous avez déjà un compte ?",
+    "email_sign_in": "Se connecter avec l'e-mail",
+    "google_sign_in_title": "Se connecter avec Google",
+    "github_sign_in_title": "Se connecter avec GitHub",
+    "close_title": "Fermer",
+    "cancel_title": "Annuler",
+    "sign_out_title": "Se déconnecter",
+    "billing_title": "Facturation",
+    "name_title": "Nom",
+    "name_placeholder": "Entrez votre nom ici",
+    "admin_title": "Système d'administration",
+    "credits_title": "Crédits : {credits}"
+  },
+  "payment": {
+    "choose_payment_method": "Choisir le mode de paiement",
+    "choose_payment_method_description": "",
+    "cancel_title": "Annuler"
+  },
+  "locale_detector": {
+    "title": "Nous avons détecté que la langue de votre navigateur est {locale}. Voulez-vous changer ?",
+    "switch_to": "Passer à {locale}"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "title": "视频字幕提取器",
+    "description": "一键提取和翻译 YouTube 和 TikTok 视频字幕"
+  },
+  "page": {
+    "title": "视频字幕提取器",
+    "description": "一键提取和翻译 YouTube 和 TikTok 视频字幕"
+  },
+  "extractor": {
+    "title": "媒体提取器",
+    "url_label": "视频链接",
+    "url_placeholder": "在此粘贴 YouTube 或 TikTok 链接...",
+    "source_lang_label": "源语言",
+    "source_lang_placeholder": "自动检测",
+    "target_lang_label": "目标语言",
+    "target_lang_placeholder": "选择语言",
+    "output_type_label": "输出类型",
+    "output_type_subtitle": "字幕",
+    "output_type_video": "视频",
+    "extract": "提取",
+    "extracting": "提取中...",
+    "translating": "翻译中...",
+    "completed": "完成",
+    "failed": "失败",
+    "loading": "加载中...",
+    "sign_in_to_extract": "登录以提取字幕",
+    "credits_cost": "消耗 {credits} 积分",
+    "credits_remaining": "剩余 {credits} 积分",
+    "buy_credits": "购买积分",
+    "extraction_progress": "提取进度",
+    "time_cost": "这可能需要最多 3 分钟...",
+    "translation_time_cost": "翻译可能需要最多 1 分钟...",
+    "download_srt": "下载 SRT",
+    "download_video": "下载视频",
+    "download_native_srt": "下载原始字幕",
+    "download_translated_srt": "下载翻译字幕",
+    "no_result": "无结果",
+    "error_message": "错误：{message}",
+    "invalid_url": "无效链接。仅支持 YouTube 和 TikTok。",
+    "active_task": "您已有一个进行中的任务。请等待其完成。",
+    "insufficient_credits": "积分不足",
+    "languages": {
+      "en": "英语",
+      "zh-CN": "中文（简体）",
+      "es": "西班牙语",
+      "fr": "法语",
+      "de": "德语",
+      "ja": "日语",
+      "ko": "韩语",
+      "pt": "葡萄牙语",
+      "ru": "俄语",
+      "it": "意大利语",
+      "ar": "阿拉伯语",
+      "hi": "印地语"
+    },
+    "cost_info": "* 费用：每次请求 10-15 积分（提取 10 积分，视频下载或翻译 15 积分）"
+  }
+}
+
+
+

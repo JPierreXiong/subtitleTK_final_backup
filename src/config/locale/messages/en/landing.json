@@ -1,0 +1,504 @@
+{
+  "header": {
+    "id": "header",
+    "brand": {
+      "title": "Subtitle ToolKit",
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "Media Extractor",
+          "url": "/ai-media-extractor",
+          "icon": "Video"
+        },
+        {
+          "title": "Pricing",
+          "url": "/pricing",
+          "icon": "DollarSign"
+        }
+      ]
+    },
+    "buttons": [],
+    "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
+      "items": [
+        {
+          "title": "Extract Media",
+          "url": "/ai-media-extractor",
+          "icon": "Video"
+        },
+        {
+          "title": "Billing",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
+        },
+        {
+          "title": "Activity",
+          "url": "/activity",
+          "icon": "Activity"
+        }
+      ]
+    },
+    "show_sign": true,
+    "show_theme": true,
+    "show_locale": true
+  },
+  "hero": {
+    "id": "hero",
+    "title": "SubtitleTK: Extract the Essence. Translate the Message. Reach the World",
+    "highlight_text": "",
+    "description": "<strong>Supercharge your content reach by turning any YouTube or TikTok video into a global masterpiece with one-click AI subtitling.</strong>",
+    "announcement": {
+      "badge": "New",
+      "title": "🎉 Subtitle TK",
+      "url": "/pricing"
+    },
+    "tip": "",
+    "buttons": [
+      {
+        "title": "Get Started",
+        "icon": "Zap",
+        "url": "/pricing",
+        "target": "_self",
+        "variant": "default"
+      }
+    ],
+    "show_avatars": true,
+    "avatars_tip": "999+ users are using Subtitle TK",
+    "show_award": false,
+    "image": {
+      "src": "/imgs/features/admin.png",
+      "alt": "hero"
+    },
+    "image_invert": {
+      "src": "/imgs/features/admin-dark.png",
+      "alt": "hero"
+    }
+  },
+  "logos": {
+    "title": "Subtitle TK is built on the shoulders of giants",
+    "items": [
+      {
+        "title": "Next.js",
+        "image": {
+          "src": "/imgs/logos/nextjs.svg",
+          "alt": "Next.js"
+        }
+      },
+      {
+        "title": "React",
+        "image": {
+          "src": "/imgs/logos/react.svg",
+          "alt": "React"
+        }
+      },
+      {
+        "title": "TailwindCSS",
+        "image": {
+          "src": "/imgs/logos/tailwindcss.svg",
+          "alt": "TailwindCSS"
+        }
+      },
+      {
+        "title": "Shadcn/UI",
+        "image": {
+          "src": "/imgs/logos/shadcn.svg",
+          "alt": "Shadcn/UI"
+        }
+      },
+      {
+        "title": "Vercel",
+        "image": {
+          "src": "/imgs/logos/vercel.svg",
+          "alt": "Vercel"
+        }
+      }
+    ]
+  },
+  "introduce": {
+    "id": "introduce",
+    "title": "What is Subtitle TK",
+    "label": "Introduce",
+    "description": "Subtitle TK is a NextJS boilerplate for building AI SaaS startups, including templates, components, and documentation.",
+    "image": {
+      "src": "/imgs/features/landing-page.png",
+      "alt": "introduce"
+    },
+    "items": [
+      {
+        "title": "Ready-to-use Templates",
+        "description": "Choose from dozens of production-ready AI SaaS templates to quickly start your project.",
+        "icon": "RiNextjsFill",
+        "image": {
+          "src": "/imgs/features/1.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "Infrastructure Setup",
+        "description": "Get instant access to scalable infrastructure with best practices built-in.",
+        "icon": "RiDatabase2Line",
+        "image": {
+          "src": "/imgs/features/2.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "Quick Deployment",
+        "description": "Deploy your AI SaaS application to production in hours, not days.",
+        "icon": "RiCloudyFill",
+        "image": {
+          "src": "/imgs/features/3.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "AI Integration",
+        "description": "Integrate AI into your project with ease using our built-in AI SDK.",
+        "icon": "RiRobot2Line",
+        "image": {
+          "src": "/imgs/features/4.png",
+          "alt": "introduce"
+        }
+      }
+    ]
+  },
+  "benefits": {
+    "id": "benefits",
+    "title": "Why Choose Subtitle TK",
+    "label": "Benefits",
+    "description": "Get everything you need to launch your AI startup - from ready-to-use templates to technical support.",
+    "items": [
+      {
+        "title": "Complete Framework",
+        "description": "Built on Next.js with authentication, payments, and AI integration - everything works out of the box.",
+        "icon": "RiNextjsFill",
+        "image": {
+          "src": "/imgs/features/user-billing.png",
+          "alt": "benefits"
+        }
+      },
+      {
+        "title": "Rich Templates Library",
+        "description": "Choose from various AI SaaS templates to kickstart your project - chatbots, image generation, and more.",
+        "icon": "RiClapperboardAiLine",
+        "image": {
+          "src": "/imgs/features/admin-settings.png",
+          "alt": "benefits"
+        }
+      },
+      {
+        "title": "Technical Guidance",
+        "description": "Get dedicated support and join our developer community to ensure your successful launch.",
+        "icon": "RiCodeFill",
+        "image": {
+          "src": "/imgs/features/landing-page.png",
+          "alt": "benefits"
+        }
+      }
+    ]
+  },
+  "usage": {
+    "id": "usage",
+    "title": "How to Launch with Subtitle TK",
+    "description": "Get your AI SaaS startup running in three simple steps:",
+    "image": {
+      "src": "/imgs/features/1.png",
+      "alt": "usage"
+    },
+    "image_position": "left",
+    "text_align": "center",
+    "items": [
+      {
+        "title": "Get Subtitle TK",
+        "description": "Buy Subtitle TK with a one-time payment. Check your email for the code and documentation.",
+        "image": {
+          "src": "/imgs/features/5.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "Start Your Project",
+        "description": "Read the documentation and clone the code of Subtitle TK. Start building your AI SaaS startup.",
+        "image": {
+          "src": "/imgs/features/6.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "Customize Your Project",
+        "description": "Modify the template with your data and contents. Specific AI functionality needs.",
+        "image": {
+          "src": "/imgs/features/7.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "Deploy to Production",
+        "description": "Deploy your project to production with a few steps and start serving customers immediately.",
+        "image": {
+          "src": "/imgs/features/8.png",
+          "alt": "usage"
+        }
+      }
+    ]
+  },
+  "features": {
+    "id": "features",
+    "title": "Key Features of Subtitle TK",
+    "description": "Everything you need to launch your AI SaaS startup quickly and efficiently.",
+    "items": [
+      {
+        "title": "Next.js Boilerplate",
+        "description": "Production-ready Next.js templates with SEO-friendly structure and i18n support.",
+        "icon": "RiNextjsFill"
+      },
+      {
+        "title": "Authentication & Payments",
+        "description": "Integrated Google OAuth, one-tap login, and Stripe payment processing.",
+        "icon": "RiKey2Fill"
+      },
+      {
+        "title": "Data Infrastructure",
+        "description": "Built-in Supabase integration for reliable and scalable data storage.",
+        "icon": "RiDatabase2Line"
+      },
+      {
+        "title": "One-Click Deployment",
+        "description": "Seamless deployment to Vercel or Cloudflare with automated setup.",
+        "icon": "RiCloudy2Fill"
+      },
+      {
+        "title": "Business Analytics",
+        "description": "Integrated Google Analytics and Search Console for tracking growth.",
+        "icon": "RiBarChart2Line"
+      },
+      {
+        "title": "AI-Ready Infrastructure",
+        "description": "Pre-configured AI integration with built-in credits system and API sales.",
+        "icon": "RiRobot2Line"
+      }
+    ]
+  },
+  "stats": {
+    "id": "stats",
+    "title": "People Love Subtitle TK",
+    "description": "for it's easy to use and fast to ship.",
+    "items": [
+      {
+        "title": "999+",
+        "description": "Customers"
+      },
+      {
+        "title": "200+",
+        "description": "Blocks"
+      },
+      {
+        "title": "50+",
+        "description": "Templates"
+      }
+    ]
+  },
+  "testimonials": {
+    "id": "testimonials",
+    "title": "What Users Say About Subtitle TK",
+    "description": "Hear from content creators and businesses who transformed their video content with Subtitle TK.",
+    "items": [
+      {
+        "name": "David Chen",
+        "role": "YouTube Content Creator",
+        "quote": "Subtitle TK transformed my YouTube channel! I can now reach global audiences with accurate subtitles in 12 languages. My views increased by 300% after adding multilingual subtitles.",
+        "image": {
+          "src": "/imgs/avatars/1.png",
+          "alt": "david"
+        }
+      },
+      {
+        "name": "Rachel Kim",
+        "role": "TikTok Influencer",
+        "quote": "One-click subtitle extraction and translation saved me hours every week. My TikTok videos now connect with viewers worldwide, and my engagement has skyrocketed!",
+        "image": {
+          "src": "/imgs/avatars/2.png",
+          "alt": "rachel"
+        }
+      },
+      {
+        "name": "Marcus Thompson",
+        "role": "Video Production Agency Owner",
+        "quote": "As a small agency, Subtitle TK gives us enterprise-level subtitle capabilities at a fraction of the cost. We process hundreds of videos monthly with perfect accuracy.",
+        "image": {
+          "src": "/imgs/avatars/3.png",
+          "alt": "marcus"
+        }
+      },
+      {
+        "name": "Sofia Garcia",
+        "role": "E-Learning Platform Manager",
+        "quote": "Subtitle TK made our educational content accessible globally. Students from 50+ countries can now learn from our courses with accurate translations. Game-changer!",
+        "image": {
+          "src": "/imgs/avatars/4.png",
+          "alt": "sofia"
+        }
+      },
+      {
+        "name": "James Wilson",
+        "role": "Marketing Director",
+        "quote": "The AI-powered translation is incredibly accurate. We localize our marketing videos for different markets in minutes instead of days. ROI is through the roof!",
+        "image": {
+          "src": "/imgs/avatars/5.png",
+          "alt": "james"
+        }
+      },
+      {
+        "name": "Anna Zhang",
+        "role": "Content Strategist",
+        "quote": "Subtitle TK's one-click solution turned our YouTube and TikTok content into a global powerhouse. Our international audience grew 500% in just 3 months!",
+        "image": {
+          "src": "/imgs/avatars/6.png",
+          "alt": "anna"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "id": "faq",
+    "title": "Frequently Asked Questions",
+    "description": "Have another question? Contact us by email.",
+    "tip": "Can't find what you're looking for? Contact our <a href='mailto:feedback@subtitleTK.com' class='text-primary font-medium hover:underline'>customer support team</a>",
+    "items": [
+      {
+        "question": "Which platforms are supported and how does the processing work?",
+        "answer": "We support video and subtitle extraction from YouTube and TikTok. The process is split into two stages: first, we extract the metadata and original subtitles; second, you can choose to use Gemini 1.5 Flash AI to translate the content into your target language."
+      },
+      {
+        "question": "How does the credit system and \"Fail-Safe\" refund policy work?",
+        "answer": "Tasks consume credits based on usage: 10 for extraction, 15 for video downloads, and 5 for AI translation. If a task fails due to a system error, the credits are automatically refunded to your account immediately."
+      },
+      {
+        "question": "What is the difference between Subscription and On-demand plans?",
+        "answer": "Subscription (Pro/Base): Best for power users, offering the lowest price per credit, high concurrency (up to 3 tasks), and no video length limits. Credits expire every 30 days. On-demand ($4.9): Perfect for casual users. These credits remain valid for 365 days."
+      },
+      {
+        "question": "Are there any limitations on video length or concurrent tasks?",
+        "answer": "Free and Base users are limited to videos under 10 minutes and can process 1 task at a time. Professional users enjoy unlimited video length and can run up to 3 tasks simultaneously for maximum efficiency."
+      },
+      {
+        "question": "How can I earn free credits daily?",
+        "answer": "You can earn 5 free credits every day by simply logging in and using our Daily Check-in feature. These credits are valid for 30 days and refresh at 00:00 UTC, allowing you to use our premium services for free over time."
+      },
+      {
+        "question": "How long is my data stored and is it secure?",
+        "answer": "Your privacy is our priority. Extracted video files are stored in encrypted Cloudflare R2 storage and are permanently deleted after 24 hours. We recommend downloading your files (SRT, CSV, or Video) within this window."
+      }
+    ]
+  },
+  "cta": {
+    "id": "cta",
+    "title": "Extract the Essence. Translate the Message",
+    "description": "Start from here with Subtitle TK.",
+    "buttons": [
+      {
+        "title": "Get Subtitle TK",
+        "url": "https://www.subtitletk.app",
+        "target": "_blank",
+        "icon": "Zap"
+      }
+    ]
+  },
+  "subscribe": {
+    "id": "subscribe",
+    "title": "Subscribe to our newsletter",
+    "description": "Get the latest news and updates from Subtitle TK.",
+    "submit": {
+      "input": {
+        "placeholder": "Enter your email"
+      },
+      "button": {
+        "title": "Subscribe"
+      },
+      "action": "/api/subscribe"
+    }
+  },
+  "footer": {
+    "id": "footer",
+    "brand": {
+      "title": "Subtitle TK",
+      "description": "SubtitleTK is a high-performance digital toolkit designed to extract and translate subtitles from YouTube and TikTok videos. We believe in simple, transparent pricing.",
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "About",
+          "children": [
+            {
+              "title": "Pricing",
+              "url": "/pricing",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Friends",
+          "children": [
+            {
+              "title": "YouTube",
+              "url": "https://www.youtube.com",
+              "target": "_blank"
+            },
+            {
+              "title": "TikTok",
+              "url": "https://www.tiktok.com",
+              "target": "_blank"
+            }
+          ]
+        }
+      ]
+    },
+    "social": {
+      "items": [
+        {
+          "title": "X",
+          "icon": "RiTwitterXFill",
+          "url": "https://x.com/your-app-name",
+          "target": "_blank"
+        },
+        {
+          "title": "Github",
+          "icon": "Github",
+          "url": "https://github.com/your-app-name",
+          "target": "_blank"
+        },
+        {
+          "title": "Discord",
+          "icon": "RiDiscordFill",
+          "url": "https://discord.gg/your-app-name",
+          "target": "_blank"
+        },
+        {
+          "title": "Email",
+          "icon": "Mail",
+          "url": "mailto:support@your-domain.com",
+          "target": "_self"
+        }
+      ]
+    },
+    "agreement": {
+      "items": [
+        {
+          "title": "Privacy Policy",
+          "url": "/privacy-policy"
+        },
+        {
+          "title": "Terms of Service",
+          "url": "/terms-of-service"
+        }
+      ]
+    },
+    "show_theme": true,
+    "show_locale": true
+  }
+}
