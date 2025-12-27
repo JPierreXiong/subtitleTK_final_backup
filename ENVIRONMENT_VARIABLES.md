@@ -239,7 +239,7 @@ CREEM_ENABLED=true
 CREEM_ENVIRONMENT=production
 CREEM_API_KEY=your-creem-api-key
 CREEM_SIGNING_SECRET=your-creem-signing-secret
-CREEM_PRODUCT_IDS={"on-demand":"prod_xxx","base":"prod_xxx","pro":"prod_xxx"}
+CREEM_PRODUCT_IDS={"starter-monthly":"prod_2tOrusjFjkm0WaOn9waSCP","base-monthly":"prod_52so9q1usRp5ZfDZ0vIBru","pro-monthly":"prod_6Wo2c7ZLGrOcz1jGrSqhi0"}
 
 # ============================================
 # 支付配置 - Stripe（可选）
