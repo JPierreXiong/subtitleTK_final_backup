@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHeader } from '@/shared/blocks/common';
 import { MediaExtractor } from '@/shared/blocks/generator';
 import { getMetadata } from '@/shared/lib/seo';
+import { CTA as CTAType } from '@/shared/types/blocks/landing';
 import { CTA, FAQ } from '@/themes/default/blocks';
 
 export const generateMetadata = getMetadata({
@@ -22,7 +23,7 @@ export default async function AiMediaExtractorPage({
   const tt = await getTranslations('ai.media');
 
   // Custom CTA for ai-media-extractor page
-  const customCta = {
+  const customCta: CTAType = {
     id: 'cta',
     title: 'Try it free，Analyze Your First YouTube and tiktok Video Now',
     description: '',
