@@ -47,7 +47,14 @@ export default async function LandingPage({
 
   // build page params
   const page: Landing = {
-    hero: t.raw('hero'),
+    hero: {
+      ...t.raw('hero'),
+      // 关闭可能导致误会的"后台截图"图片，符合 Creem 合规要求
+      image: undefined,
+      image_invert: undefined,
+      // 确保不显示虚假用户头像
+      show_avatars: false,
+    },
     // 明确设为 undefined 阻止 UI 渲染
     logos: undefined,
     introduce: undefined,

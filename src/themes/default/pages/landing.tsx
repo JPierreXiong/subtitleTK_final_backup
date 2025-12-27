@@ -48,11 +48,7 @@ export default async function LandingPage({
       'SRT format export',
       'No watermark videos',
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '1024',
-    },
+    // aggregateRating removed to ensure compliance with Creem requirements - no false information
     url: appUrl,
   };
 
@@ -91,8 +87,8 @@ export default async function LandingPage({
       )}
 
       {page.hero && <Hero hero={page.hero} />}
-      {/* 保留：用户评价功能（紧跟在 Hero 后面） */}
-      {page.testimonials && <Testimonials testimonials={page.testimonials} />}
+      {/* 已隐藏：用户评价功能 - 确保不会因为任何原因显示，符合 Creem 合规要求 */}
+      {/* {page.testimonials && <Testimonials testimonials={page.testimonials} />} */}
       
       {/* 已注释：不需要的区块 */}
       {/* {page.logos && <Logos logos={page.logos} />} */}
