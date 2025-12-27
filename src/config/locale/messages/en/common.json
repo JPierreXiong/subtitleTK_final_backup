@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "title": "Subtitle TK Template Two",
-    "description": "Subtitle TK is a NextJS boilerplate for building AI SaaS startups. Ship Fast with a variety of templates and components.",
-    "keywords": "subtitle tk, subtitle-toolkit, subtitle-tk-demo"
+    "title": "Subtitle TK - Extract YouTube and TikTok Video Subtitles",
+    "description": "Extract, download, and translate subtitles from YouTube and TikTok videos easily. Support for 12+ languages with AI-powered translation. Free tool for content creators.",
+    "keywords": "youtube subtitle extractor, tiktok transcript download, video subtitle tool, youtube to text, tiktok subtitle generator, video transcription, subtitle translator, youtube transcript, tiktok video download"
   },
   "sign": {
     "sign_in_title": "Sign In",

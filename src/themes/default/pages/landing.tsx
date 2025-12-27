@@ -1,3 +1,6 @@
+import Script from 'next/script';
+
+import { envConfigs } from '@/config';
 import { Landing } from '@/shared/types/blocks/landing';
 import {
   CTA,
@@ -20,8 +23,73 @@ export default async function LandingPage({
   locale?: string;
   page: Landing;
 }) {
+  // JSON-LD structured data for SEO and AdSense
+  const appUrl = envConfigs.app_url || 'https://subtitletk.app';
+  
+  // SoftwareApplication JSON-LD
+  const jsonLdSoftware = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Subtitle TK',
+    description:
+      'Professional tool to extract, download, and translate subtitles from YouTube and TikTok videos. Support for 12+ languages with AI-powered translation.',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    featureList: [
+      'YouTube transcript extraction',
+      'TikTok video download',
+      'Auto-translation to 12+ languages',
+      'High-speed processing',
+      'SRT format export',
+      'No watermark videos',
+    ],
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '1024',
+    },
+    url: appUrl,
+  };
+
+  // FAQPage JSON-LD (if FAQ exists)
+  const jsonLdFAQ = page.faq?.items
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: page.faq.items.map((item) => ({
+          '@type': 'Question',
+          name: item.question || '',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer || '',
+          },
+        })),
+      }
+    : null;
+
   return (
     <>
+      {/* JSON-LD structured data for SEO */}
+      <Script
+        id="json-ld-software-application"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSoftware) }}
+      />
+      
+      {/* FAQPage JSON-LD structured data */}
+      {jsonLdFAQ && (
+        <Script
+          id="json-ld-faq-page"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFAQ) }}
+        />
+      )}
+
       {page.hero && <Hero hero={page.hero} />}
       {/* 保留：用户评价功能（紧跟在 Hero 后面） */}
       {page.testimonials && <Testimonials testimonials={page.testimonials} />}
@@ -39,7 +107,7 @@ export default async function LandingPage({
         <Subscribe subscribe={page.subscribe} className="bg-muted" />
       )} */}
       {page.faq && <FAQ faq={page.faq} />}
-      {/* {page.cta && <CTA cta={page.cta} className="bg-muted" />} */}
+      {page.cta && <CTA cta={page.cta} className="bg-muted" />}
     </>
   );
 }

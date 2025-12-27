@@ -48,9 +48,9 @@
   },
   "hero": {
     "id": "hero",
-    "title": "Read Videos, Don't Just Watch Them",
+    "title": "Read youtube and tiktok Videos, Don't Just Watch Them",
     "highlight_text": "",
-    "description": "One-click to get high-quality text and SRT files. No watermark, no hassle, just pure data",
+    "description": "Built for YouTubers, TikTokers, and content creators who want to repurpose videos faster. One-click to get high-quality text and SRT files.",
     "announcement": {
       "badge": "New",
       "title": "🎉 Subtitle TK",
@@ -59,9 +59,9 @@
     "tip": "<span style=\"font-size: 0.75rem; font-weight: 300;\">No credit card required</span>",
     "buttons": [
       {
-        "title": "Analyze Your First Video Now",
+        "title": "analyze your first Video Now",
         "icon": "Zap",
-        "url": "/pricing",
+        "url": "/ai-media-extractor",
         "target": "_self",
         "variant": "default",
         "className": "bg-[#FFD700] hover:bg-[#FFC700] text-black font-semibold"
@@ -371,40 +371,48 @@
     "tip": "Can't find what you're looking for? Contact our <a href='mailto:feedback@subtitleTK.com' class='text-primary font-medium hover:underline'>customer support team</a>",
     "items": [
       {
-        "question": "Which platforms are supported and how does the processing work?",
-        "answer": "We support video and subtitle extraction from YouTube and TikTok. The process is split into two stages: first, we extract the metadata and original subtitles; second, you can choose to use Gemini 1.5 Flash AI to translate the content into your target language."
+        "question": "How can I extract transcripts from YouTube videos using Subtitle TK?",
+        "answer": "Extracting transcripts from YouTube videos is simple with Subtitle TK. Copy the YouTube video URL (supports standard watch links, Shorts, and youtu.be formats) and paste it into our input box. Click the 'Extract' button, and our advanced tool will instantly retrieve the full transcript with timestamps. You can then download the transcript in SRT format or choose to translate it into one of 12+ supported languages using our AI-powered Gemini 1.5 Flash translation engine. The entire process is automated, secure, and typically completes within minutes."
       },
       {
-        "question": "How does the credit system and \"Fail-Safe\" refund policy work?",
-        "answer": "Tasks consume credits based on usage: 10 for extraction, 15 for video downloads, and 5 for AI translation. If a task fails due to a system error, the credits are automatically refunded to your account immediately."
+        "question": "Is Subtitle TK free to use for personal study and research?",
+        "answer": "Yes, Subtitle TK is designed as a free online resource for researchers, language learners, and content creators. We offer a free tier with daily check-in rewards - you can earn 5 free credits every day by logging in and using our Daily Check-in feature. These credits are valid for 30 days and can be used for transcript extraction, video analysis, and translation. For power users who need higher volume processing, we offer subscription plans (Pro/Base) with the lowest price per credit, high concurrency (up to 3 tasks), and no video length limits. We also have on-demand plans ($4.9) perfect for casual users, with credits valid for 365 days."
       },
       {
-        "question": "What is the difference between Subscription and On-demand plans?",
-        "answer": "Subscription (Pro/Base): Best for power users, offering the lowest price per credit, high concurrency (up to 3 tasks), and no video length limits. Credits expire every 30 days. On-demand ($4.9): Perfect for casual users. These credits remain valid for 365 days."
+        "question": "What file formats can I download from Subtitle TK?",
+        "answer": "Subtitle TK supports multiple output formats to meet your content analysis and research needs. You can download subtitles in SRT format (standard subtitle file compatible with video players), CSV format for spreadsheet analysis and data processing, or download the complete video file for offline study. All downloads are available without watermarks, ensuring professional-quality results. This versatility makes Subtitle TK perfect for content creators analyzing trending scripts, researchers studying video content, and language learners practicing translation skills."
       },
       {
-        "question": "Are there any limitations on video length or concurrent tasks?",
-        "answer": "Free and Base users are limited to videos under 10 minutes and can process 1 task at a time. Professional users enjoy unlimited video length and can run up to 3 tasks simultaneously for maximum efficiency."
+        "question": "How does the credit system and refund policy work?",
+        "answer": "Tasks consume credits based on usage: 10 credits for subtitle extraction, 15 credits for video downloads, and 5 credits for AI translation. Our \"Fail-Safe\" refund policy ensures that if a task fails due to a system error, all credits are automatically refunded to your account immediately. This protects your investment and ensures you only pay for successful operations."
       },
       {
-        "question": "How can I earn free credits daily?",
-        "answer": "You can earn 5 free credits every day by simply logging in and using our Daily Check-in feature. These credits are valid for 30 days and refresh at 00:00 UTC, allowing you to use our premium services for free over time."
+        "question": "Can I translate video subtitles into multiple languages?",
+        "answer": "Absolutely. Subtitle TK features a powerful AI-powered translation engine that supports 12+ major languages including English, Chinese (Simplified), Spanish, French, German, Japanese, Korean, Portuguese, Russian, Italian, Arabic, and Hindi. Our translation system uses Google's Gemini 1.5 Flash model to provide accurate, context-aware translations that preserve the original meaning while adapting to your target language. This allows users to break language barriers and repurpose content for international audiences efficiently. Perfect for content creators expanding globally, researchers studying cross-cultural content, and language learners improving their skills."
       },
       {
-        "question": "How long is my data stored and is it secure?",
-        "answer": "Your privacy is our priority. Extracted video files are stored in encrypted Cloudflare R2 storage and are permanently deleted after 24 hours. We recommend downloading your files (SRT, CSV, or Video) within this window."
+        "question": "Are there any video length or processing limitations?",
+        "answer": "Free and Base plan users can process videos under 10 minutes in length and handle 1 task at a time. Professional plan users enjoy unlimited video length and can run up to 3 tasks simultaneously for maximum efficiency. All plans support both YouTube and TikTok video processing, with automatic language detection and high-quality subtitle extraction."
+      },
+      {
+        "question": "How secure is my data and how long is it stored?",
+        "answer": "Your privacy and data security are our top priorities. All extracted video files are stored in encrypted Cloudflare R2 storage with enterprise-grade security. Files are automatically and permanently deleted after 24 hours. We recommend downloading your files (SRT, CSV, or Video) within this window to ensure you have local copies. We never share your data with third parties. Subtitle TK is designed for personal use, research, and educational purposes only, and we maintain strict data protection protocols to ensure your information remains confidential."
+      },
+      {
+        "question": "Is it legal to extract transcripts and download videos?",
+        "answer": "Subtitle TK is designed for personal use, research, and educational purposes only. Users must ensure they have the right to access the content and comply with the original platform's terms of service and copyright laws. We do not encourage the unauthorized distribution of copyrighted material. Our tool functions by accessing publicly available metadata to generate transcripts and facilitate video analysis. We respect the intellectual property rights of all content creators and platforms, and we are not affiliated with YouTube, TikTok, or any of their subsidiaries."
       }
     ]
   },
   "cta": {
     "id": "cta",
-    "title": "Extract the Essence. Translate the Message",
-    "description": "Start from here with Subtitle TK.",
+    "title": "Try it free，Analyze Your First YouTube and tiktok Video Now",
+    "description": "",
     "tip": "<span style=\"font-size: 0.75rem; font-weight: 300;\">No credit card required</span>",
     "buttons": [
       {
-        "title": "Analyze Your First Video Now",
-        "url": "/pricing",
+        "title": "analyze your first Video Now",
+        "url": "/ai-media-extractor",
         "target": "_self",
         "icon": "Zap",
         "variant": "default",
@@ -430,7 +438,7 @@
     "id": "footer",
     "brand": {
       "title": "Subtitle TK",
-      "description": "SubtitleTK is a high-performance digital toolkit designed to extract and translate subtitles from YouTube and TikTok videos. We believe in simple, transparent pricing.",
+      "description": "Subtitle TK is a professional video content analysis and multi-language transcript extraction tool. We empower content creators, researchers, and language learners by providing seamless access to video metadata. Our mission is to facilitate cross-cultural communication and knowledge sharing through advanced translation technology.",
       "url": "/"
     },
     "nav": {
@@ -499,6 +507,10 @@
         {
           "title": "Terms of Service",
           "url": "/terms-of-service"
+        },
+        {
+          "title": "Disclaimer",
+          "url": "/disclaimer"
         }
       ]
     },

@@ -21,6 +21,24 @@ export default async function AiMediaExtractorPage({
   const t = await getTranslations('landing');
   const tt = await getTranslations('ai.media');
 
+  // Custom CTA for ai-media-extractor page
+  const customCta = {
+    id: 'cta',
+    title: 'Try it free，Analyze Your First YouTube and tiktok Video Now',
+    description: '',
+    tip: '<span style="font-size: 0.75rem; font-weight: 300;">No credit card required</span>',
+    buttons: [
+      {
+        title: 'analyze your first Video Now',
+        url: 'https://www.subtitletk.app/ai-media-extractor',
+        target: '_self',
+        icon: 'Zap',
+        variant: 'default',
+        className: 'bg-[#FFD700] hover:bg-[#FFC700] text-black font-semibold',
+      },
+    ],
+  };
+
   return (
     <>
       <PageHeader
@@ -30,7 +48,7 @@ export default async function AiMediaExtractorPage({
       />
       <MediaExtractor srOnlyTitle={tt.raw('extractor.title')} />
       <FAQ faq={t.raw('faq')} />
-      <CTA cta={t.raw('cta')} className="bg-muted" />
+      <CTA cta={customCta} className="bg-muted" />
     </>
   );
 }

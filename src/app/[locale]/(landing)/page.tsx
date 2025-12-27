@@ -62,7 +62,7 @@ export default async function LandingPage({
     // 可选保留的区块
     subscribe: t.raw('subscribe'),
     faq: t.raw('faq'),
-    cta: undefined, // 已隐藏 CTA 区块
+    cta: t.raw('cta'), // 激活 CTA 区块
   };
 
   // load page component

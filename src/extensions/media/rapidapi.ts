@@ -96,6 +96,7 @@ export class RapidAPIProvider {
 
   /**
    * Extract YouTube video metadata and subtitles
+   * Implements fallback strategy: Free API first, then Paid API if failed
    * @param url YouTube video URL
    * @returns Normalized media data
    */
@@ -103,15 +104,51 @@ export class RapidAPIProvider {
     // Format URL (convert shorts to watch format for API compatibility)
     const formattedUrl = this.formatYouTubeUrl(url);
     
-    const host =
-      this.configs.hostYouTubeTranscript ||
-      'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com';
+    // Extract video ID for free API
+    const videoId = this.extractYouTubeVideoId(formattedUrl);
+    if (!videoId) {
+      throw new Error(`Invalid YouTube URL: ${url}`);
+    }
 
-    // Fetch transcript/subtitle using new API endpoint
-    const transcriptData = await this.fetchYouTubeTranscript(formattedUrl, host).catch((error) => {
-      console.warn('Failed to fetch YouTube transcript:', error);
-      return null; // Allow task to continue without subtitle
-    });
+    // Step 1: Try Free API first (only call once)
+    let transcriptData: any = null;
+    let metadata: any = {};
+    
+    try {
+      console.log('[YouTube Transcript] Attempting Free API...');
+      const freeApiResult = await this.fetchYouTubeTranscriptFreeAPI(videoId);
+      
+      if (freeApiResult.success && freeApiResult.transcriptData) {
+        console.log('[YouTube Transcript] Free API succeeded!');
+        transcriptData = freeApiResult.transcriptData;
+        metadata = freeApiResult.metadata || {};
+      } else {
+        // Free API failed, log reason and switch to Paid API
+        console.warn(`[YouTube Transcript] Free API failed: ${freeApiResult.reason} - ${freeApiResult.message}`);
+        throw new Error(`Free API failed: ${freeApiResult.reason}`);
+      }
+    } catch (error: any) {
+      // Free API failed, try Paid API (only call once)
+      console.log('[YouTube Transcript] Switching to Paid API as fallback...');
+      
+      try {
+        const paidApiResult = await this.fetchYouTubeTranscriptPaidAPI(formattedUrl);
+        
+        if (paidApiResult.success && paidApiResult.transcriptData) {
+          console.log('[YouTube Transcript] Paid API succeeded!');
+          transcriptData = paidApiResult.transcriptData;
+          metadata = paidApiResult.metadata || {};
+        } else {
+          // Both APIs failed
+          console.error(`[YouTube Transcript] Paid API also failed: ${paidApiResult.reason} - ${paidApiResult.message}`);
+          throw new Error(`Both APIs failed. Free: ${error.message}, Paid: ${paidApiResult.message}`);
+        }
+      } catch (paidError: any) {
+        // Both APIs failed, throw error
+        console.error('[YouTube Transcript] All APIs failed');
+        throw new Error(`Failed to fetch YouTube transcript: ${paidError.message}`);
+      }
+    }
 
     // Normalize subtitle
     const subtitleRaw = transcriptData
@@ -119,7 +156,7 @@ export class RapidAPIProvider {
       : null;
 
     // Extract metadata from transcript response if available
-    const metadata = this.normalizeMetadata(transcriptData || {}, 'youtube');
+    const normalizedMetadata = this.normalizeMetadata(transcriptData || metadata || {}, 'youtube');
 
     // Calculate subtitle statistics
     const subtitleStats = subtitleRaw
@@ -128,16 +165,16 @@ export class RapidAPIProvider {
 
     return {
       platform: 'youtube',
-      title: metadata.title || '',
-      author: metadata.author,
-      likes: metadata.likes || 0,
-      views: metadata.views || 0,
-      shares: metadata.shares || 0,
-      duration: metadata.duration,
-      publishedAt: metadata.publishedAt,
-      thumbnailUrl: metadata.thumbnailUrl,
+      title: normalizedMetadata.title || '',
+      author: normalizedMetadata.author,
+      likes: normalizedMetadata.likes || 0,
+      views: normalizedMetadata.views || 0,
+      shares: normalizedMetadata.shares || 0,
+      duration: normalizedMetadata.duration,
+      publishedAt: normalizedMetadata.publishedAt,
+      thumbnailUrl: normalizedMetadata.thumbnailUrl,
       subtitleRaw: subtitleRaw || undefined,
-      sourceLang: metadata.sourceLang || 'auto',
+      sourceLang: normalizedMetadata.sourceLang || 'auto',
       subtitleCharCount: subtitleStats.charCount,
       subtitleLineCount: subtitleStats.lineCount,
       isTikTokVideo: false,
@@ -291,25 +328,59 @@ export class RapidAPIProvider {
 
   /**
    * Fetch TikTok video download via RapidAPI (for video download only)
+   * Implements fallback strategy: Free API first, then Paid API if failed
    * @param url TikTok video URL
    * @returns Normalized media data with video URL
    */
   private async fetchTikTokVideo(url: string): Promise<NormalizedMediaData> {
-    const downloadHost =
-      this.configs.hostTikTokDownload ||
-      'tiktok-video-no-watermark2.p.rapidapi.com';
-
-    // Extract video ID from URL
+    // Extract video ID from URL (for validation)
     const videoId = this.extractTikTokVideoId(url);
     if (!videoId) {
       throw new Error(`Invalid TikTok URL: ${url}`);
     }
 
-    // Call TikTok video download API
-    const videoData = await this.fetchTikTokVideoDownload(url, downloadHost);
+    // Step 1: Try Free API first (only call once)
+    let videoData: any = null;
+    let metadata: any = {};
+    
+    try {
+      console.log('[TikTok Video Download] Attempting Free API...');
+      const freeApiResult = await this.fetchTikTokVideoDownloadFreeAPI(url);
+      
+      if (freeApiResult.success && freeApiResult.videoData) {
+        console.log('[TikTok Video Download] Free API succeeded!');
+        videoData = freeApiResult.videoData;
+        metadata = freeApiResult.metadata || {};
+      } else {
+        // Free API failed, log reason and switch to Paid API
+        console.warn(`[TikTok Video Download] Free API failed: ${freeApiResult.reason} - ${freeApiResult.message}`);
+        throw new Error(`Free API failed: ${freeApiResult.reason}`);
+      }
+    } catch (error: any) {
+      // Free API failed, try Paid API (only call once)
+      console.log('[TikTok Video Download] Switching to Paid API as fallback...');
+      
+      try {
+        const paidApiResult = await this.fetchTikTokVideoDownloadPaidAPI(url);
+        
+        if (paidApiResult.success && paidApiResult.videoData) {
+          console.log('[TikTok Video Download] Paid API succeeded!');
+          videoData = paidApiResult.videoData;
+          metadata = paidApiResult.metadata || {};
+        } else {
+          // Both APIs failed
+          console.error(`[TikTok Video Download] Paid API also failed: ${paidApiResult.reason} - ${paidApiResult.message}`);
+          throw new Error(`Both APIs failed. Free: ${error.message}, Paid: ${paidApiResult.message}`);
+        }
+      } catch (paidError: any) {
+        // Both APIs failed, throw error
+        console.error('[TikTok Video Download] All APIs failed');
+        throw new Error(`Failed to fetch TikTok video: ${paidError.message}`);
+      }
+    }
 
     // Normalize metadata
-    const metadata = this.normalizeMetadata(videoData, 'tiktok');
+    const normalizedMetadata = this.normalizeMetadata(videoData || metadata || {}, 'tiktok');
 
     // Extract video URL (no-watermark preferred)
     // Try multiple possible field names from API response
@@ -348,17 +419,17 @@ export class RapidAPIProvider {
 
     return {
       platform: 'tiktok',
-      title: metadata.title || '',
-      author: metadata.author,
-      likes: metadata.likes || 0,
-      views: metadata.views || 0,
-      shares: metadata.shares || 0,
-      duration: metadata.duration,
-      publishedAt: metadata.publishedAt,
-      thumbnailUrl: metadata.thumbnailUrl,
+      title: normalizedMetadata.title || '',
+      author: normalizedMetadata.author,
+      likes: normalizedMetadata.likes || 0,
+      views: normalizedMetadata.views || 0,
+      shares: normalizedMetadata.shares || 0,
+      duration: normalizedMetadata.duration,
+      publishedAt: normalizedMetadata.publishedAt,
+      thumbnailUrl: normalizedMetadata.thumbnailUrl,
       videoUrl: videoUrl,
       subtitleRaw: subtitleRaw || undefined,
-      sourceLang: metadata.sourceLang || 'auto',
+      sourceLang: normalizedMetadata.sourceLang || 'auto',
       subtitleCharCount: subtitleStats.charCount,
       subtitleLineCount: subtitleStats.lineCount,
       isTikTokVideo: !!videoUrl,
@@ -367,21 +438,50 @@ export class RapidAPIProvider {
 
   /**
    * Extract TikTok video metadata and subtitles (for subtitle extraction only)
+   * Implements fallback strategy: Free API first, then Paid API if failed
    * @param url TikTok video URL
    * @returns Normalized media data
    */
   private async fetchTikTokMedia(url: string): Promise<NormalizedMediaData> {
-    const transcriptHost =
-      this.configs.hostTikTokTranscript ||
-      'tiktok-transcriptor-api3.p.rapidapi.com';
-
-    // Fetch transcript/subtitle
-    const [transcriptData] = await Promise.all([
-      this.fetchTikTokTranscript(url, transcriptHost).catch((error) => {
-        console.warn('Failed to fetch TikTok transcript:', error);
-        return null; // Allow task to continue without subtitle
-      }),
-    ]);
+    // Step 1: Try Free API first (only call once)
+    let transcriptData: any = null;
+    let metadata: any = {};
+    
+    try {
+      console.log('[TikTok Transcript] Attempting Free API...');
+      const freeApiResult = await this.fetchTikTokTranscriptFreeAPI(url);
+      
+      if (freeApiResult.success && freeApiResult.transcriptData) {
+        console.log('[TikTok Transcript] Free API succeeded!');
+        transcriptData = freeApiResult.transcriptData;
+        metadata = freeApiResult.metadata || {};
+      } else {
+        // Free API failed, log reason and switch to Paid API
+        console.warn(`[TikTok Transcript] Free API failed: ${freeApiResult.reason} - ${freeApiResult.message}`);
+        throw new Error(`Free API failed: ${freeApiResult.reason}`);
+      }
+    } catch (error: any) {
+      // Free API failed, try Paid API (only call once)
+      console.log('[TikTok Transcript] Switching to Paid API as fallback...');
+      
+      try {
+        const paidApiResult = await this.fetchTikTokTranscriptPaidAPI(url);
+        
+        if (paidApiResult.success && paidApiResult.transcriptData) {
+          console.log('[TikTok Transcript] Paid API succeeded!');
+          transcriptData = paidApiResult.transcriptData;
+          metadata = paidApiResult.metadata || {};
+        } else {
+          // Both APIs failed
+          console.error(`[TikTok Transcript] Paid API also failed: ${paidApiResult.reason} - ${paidApiResult.message}`);
+          throw new Error(`Both APIs failed. Free: ${error.message}, Paid: ${paidApiResult.message}`);
+        }
+      } catch (paidError: any) {
+        // Both APIs failed, throw error
+        console.error('[TikTok Transcript] All APIs failed');
+        throw new Error(`Failed to fetch TikTok transcript: ${paidError.message}`);
+      }
+    }
 
     // Normalize subtitle
     const subtitleRaw = transcriptData
@@ -389,7 +489,7 @@ export class RapidAPIProvider {
       : null;
 
     // Extract metadata from transcript response
-    const metadata = this.normalizeMetadata(transcriptData || {}, 'tiktok');
+    const normalizedMetadata = this.normalizeMetadata(transcriptData || metadata || {}, 'tiktok');
 
     // If video download is needed, fetch video URL (no-watermark)
     let videoUrl: string | undefined;
@@ -411,17 +511,17 @@ export class RapidAPIProvider {
 
     return {
       platform: 'tiktok',
-      title: metadata.title || '',
-      author: metadata.author,
-      likes: metadata.likes || 0,
-      views: metadata.views || 0,
-      shares: metadata.shares || 0,
-      duration: metadata.duration,
-      publishedAt: metadata.publishedAt,
-      thumbnailUrl: metadata.thumbnailUrl,
+      title: normalizedMetadata.title || '',
+      author: normalizedMetadata.author,
+      likes: normalizedMetadata.likes || 0,
+      views: normalizedMetadata.views || 0,
+      shares: normalizedMetadata.shares || 0,
+      duration: normalizedMetadata.duration,
+      publishedAt: normalizedMetadata.publishedAt,
+      thumbnailUrl: normalizedMetadata.thumbnailUrl,
       videoUrl: videoUrl,
       subtitleRaw: subtitleRaw || undefined,
-      sourceLang: metadata.sourceLang || 'auto',
+      sourceLang: normalizedMetadata.sourceLang || 'auto',
       subtitleCharCount: subtitleStats.charCount,
       subtitleLineCount: subtitleStats.lineCount,
       isTikTokVideo: !!videoUrl, // Flag to indicate TikTok video is available for download
@@ -429,10 +529,245 @@ export class RapidAPIProvider {
   }
 
   /**
-   * Fetch YouTube transcript via RapidAPI (new API endpoint)
+   * Fetch YouTube transcript via Free API (YouTube Video Summarizer)
+   * Only called once per request
+   * @param videoId YouTube video ID
+   * @returns Result with transcript data or failure reason
+   */
+  private async fetchYouTubeTranscriptFreeAPI(
+    videoId: string
+  ): Promise<{
+    success: boolean;
+    transcriptData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const MIN_TRANSCRIPT_LENGTH = 300; // Minimum transcript length (characters)
+    
+    const apiUrl = `https://youtube-video-summarizer-gpt-ai.p.rapidapi.com/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`;
+    const host = 'youtube-video-summarizer-gpt-ai.p.rapidapi.com';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        signal: AbortSignal.timeout(FREE_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        if (response.status === 429) {
+          return {
+            success: false,
+            reason: 'RATE_LIMIT',
+            message: 'Free API rate limit exceeded',
+          };
+        }
+        if (response.status === 403) {
+          return {
+            success: false,
+            reason: 'QUOTA_EXCEEDED',
+            message: 'Free API quota exceeded or disabled',
+          };
+        }
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const errorMessage = (data.error || data.message || '').toLowerCase();
+      
+      // 检查额度/限额
+      if (
+        errorMessage.includes('quota') ||
+        errorMessage.includes('limit') ||
+        errorMessage.includes('free plan disabled') ||
+        errorMessage.includes('exceeded')
+      ) {
+        return {
+          success: false,
+          reason: 'QUOTA_EXCEEDED',
+          message: 'Free API quota exceeded or disabled',
+        };
+      }
+
+      // 数据层面失败判断
+      const transcript = data.transcript || data.transcription || '';
+      
+      // 检查是否有transcript
+      if (!transcript || transcript.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_TRANSCRIPT',
+          message: 'No transcript available in response',
+        };
+      }
+
+      // 检查transcript长度（防止只有summary）
+      if (transcript.length < MIN_TRANSCRIPT_LENGTH) {
+        // 如果只有summary但transcript太短，判定为失败
+        if (data.summary && data.summary.length > transcript.length) {
+          return {
+            success: false,
+            reason: 'ONLY_SUMMARY',
+            message: 'Only summary available, transcript too short',
+          };
+        }
+      }
+
+      // ✅ 成功：返回transcript数据
+      return {
+        success: true,
+        transcriptData: data,
+        metadata: {
+          title: data.title,
+          author: data.author,
+          summary: data.summary, // 额外bonus
+        },
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Free API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch YouTube transcript via Paid API (Youtube Transcripts)
+   * Only called once per request (as fallback)
+   * @param url YouTube video URL
+   * @returns Result with transcript data or failure reason
+   */
+  private async fetchYouTubeTranscriptPaidAPI(
+    url: string
+  ): Promise<{
+    success: boolean;
+    transcriptData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    
+    const apiUrl = 'https://youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com/transcribe';
+    const host = 'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        body: JSON.stringify({ url }),
+        signal: AbortSignal.timeout(PAID_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const transcription = data.transcription || '';
+      const errorMsg = data.error || data.message || '';
+
+      if (!transcription || transcription.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_TRANSCRIPTION',
+          message: errorMsg || 'No transcription available',
+        };
+      }
+
+      // 检查特定错误信息
+      const errorMessage = errorMsg.toLowerCase();
+      if (
+        errorMessage.includes('video not found') ||
+        errorMessage.includes('invalid url')
+      ) {
+        return {
+          success: false,
+          reason: 'VIDEO_NOT_FOUND',
+          message: 'Video not found or invalid URL',
+        };
+      }
+
+      if (
+        errorMessage.includes('private video') ||
+        errorMessage.includes('access denied')
+      ) {
+        return {
+          success: false,
+          reason: 'PRIVATE_VIDEO',
+          message: 'Video is private or access denied',
+        };
+      }
+
+      if (errorMessage.includes('no subtitle')) {
+        return {
+          success: false,
+          reason: 'NO_SUBTITLE',
+          message: 'Video has no subtitle available',
+        };
+      }
+
+      // ✅ 成功：返回transcription数据
+      return {
+        success: true,
+        transcriptData: data,
+        metadata: {},
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Paid API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch YouTube transcript via RapidAPI (Legacy method, kept for compatibility)
    * @param url YouTube video URL
    * @param host RapidAPI host
    * @returns Transcript data
+   * @deprecated Use fetchYouTubeTranscriptFreeAPI or fetchYouTubeTranscriptPaidAPI instead
    */
   private async fetchYouTubeTranscript(
     url: string,
@@ -464,10 +799,263 @@ export class RapidAPIProvider {
   }
 
   /**
-   * Fetch TikTok transcript via RapidAPI
+   * Fetch TikTok transcript via Free API (TikTok Transcriptor API3)
+   * Only called once per request
+   * @param url TikTok video URL
+   * @returns Result with transcript data or failure reason
+   */
+  private async fetchTikTokTranscriptFreeAPI(
+    url: string
+  ): Promise<{
+    success: boolean;
+    transcriptData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const MIN_TRANSCRIPT_LENGTH = 100; // Minimum transcript length (characters) - TikTok videos are usually shorter
+    
+    const apiUrl = 'https://tiktok-transcriptor-api3.p.rapidapi.com/index.php';
+    const host = 'tiktok-transcriptor-api3.p.rapidapi.com';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        body: JSON.stringify({ url }),
+        signal: AbortSignal.timeout(FREE_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        if (response.status === 429) {
+          return {
+            success: false,
+            reason: 'RATE_LIMIT',
+            message: 'Free API rate limit exceeded',
+          };
+        }
+        if (response.status === 403) {
+          return {
+            success: false,
+            reason: 'QUOTA_EXCEEDED',
+            message: 'Free API quota exceeded or disabled',
+          };
+        }
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const errorMessage = (data.error || data.message || '').toLowerCase();
+      
+      // 检查额度/限额
+      if (
+        errorMessage.includes('quota') ||
+        errorMessage.includes('limit') ||
+        errorMessage.includes('free plan disabled') ||
+        errorMessage.includes('exceeded')
+      ) {
+        return {
+          success: false,
+          reason: 'QUOTA_EXCEEDED',
+          message: 'Free API quota exceeded or disabled',
+        };
+      }
+
+      // 数据层面失败判断
+      // TikTok API可能返回transcript、subtitle、text等字段
+      const transcript = 
+        data.transcript || 
+        data.subtitle || 
+        data.text || 
+        data.transcription || 
+        data.caption || 
+        '';
+
+      // 检查是否有transcript
+      if (!transcript || transcript.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_TRANSCRIPT',
+          message: 'No transcript available in response',
+        };
+      }
+
+      // 检查transcript长度（TikTok视频通常较短，所以阈值较低）
+      if (transcript.length < MIN_TRANSCRIPT_LENGTH) {
+        // 如果transcript太短，可能是错误响应
+        if (errorMessage && errorMessage.length > 0) {
+          return {
+            success: false,
+            reason: 'INVALID_RESPONSE',
+            message: 'Transcript too short or invalid response',
+          };
+        }
+      }
+
+      // ✅ 成功：返回transcript数据
+      return {
+        success: true,
+        transcriptData: data,
+        metadata: {
+          title: data.title,
+          author: data.author,
+          description: data.description,
+        },
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Free API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch TikTok transcript via Paid API (TikTok Transcript)
+   * Only called once per request (as fallback)
+   * @param url TikTok video URL
+   * @returns Result with transcript data or failure reason
+   */
+  private async fetchTikTokTranscriptPaidAPI(
+    url: string
+  ): Promise<{
+    success: boolean;
+    transcriptData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    
+    const apiUrl = 'https://tiktok-transcript.p.rapidapi.com/transcribe-tiktok-audio';
+    const host = 'tiktok-transcript.p.rapidapi.com';
+
+    try {
+      // Note: This API uses form-urlencoded format
+      const formData = new URLSearchParams();
+      formData.append('url', url);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        body: formData.toString(),
+        signal: AbortSignal.timeout(PAID_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const transcription = 
+        data.transcription || 
+        data.transcript || 
+        data.text || 
+        data.subtitle || 
+        '';
+      const errorMsg = data.error || data.message || '';
+
+      if (!transcription || transcription.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_TRANSCRIPTION',
+          message: errorMsg || 'No transcription available',
+        };
+      }
+
+      // 检查特定错误信息
+      const errorMessage = errorMsg.toLowerCase();
+      if (
+        errorMessage.includes('video not found') ||
+        errorMessage.includes('invalid url')
+      ) {
+        return {
+          success: false,
+          reason: 'VIDEO_NOT_FOUND',
+          message: 'Video not found or invalid URL',
+        };
+      }
+
+      if (
+        errorMessage.includes('private video') ||
+        errorMessage.includes('access denied')
+      ) {
+        return {
+          success: false,
+          reason: 'PRIVATE_VIDEO',
+          message: 'Video is private or access denied',
+        };
+      }
+
+      if (errorMessage.includes('no subtitle') || errorMessage.includes('no transcript')) {
+        return {
+          success: false,
+          reason: 'NO_SUBTITLE',
+          message: 'Video has no subtitle available',
+        };
+      }
+
+      // ✅ 成功：返回transcription数据
+      return {
+        success: true,
+        transcriptData: data,
+        metadata: {},
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Paid API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch TikTok transcript via RapidAPI (Legacy method, kept for compatibility)
    * @param url TikTok video URL
    * @param host RapidAPI host
    * @returns Transcript data
+   * @deprecated Use fetchTikTokTranscriptFreeAPI or fetchTikTokTranscriptPaidAPI instead
    */
   private async fetchTikTokTranscript(url: string, host: string): Promise<any> {
     const apiUrl = `https://${host}/index.php`;
@@ -648,12 +1236,289 @@ export class RapidAPIProvider {
   }
 
   /**
-   * Fetch TikTok video download via RapidAPI
+   * Fetch TikTok video download via Free API (Snap Video3)
+   * Only called once per request
+   * @param url TikTok video URL
+   * @returns Result with video data or failure reason
+   */
+  private async fetchTikTokVideoDownloadFreeAPI(
+    url: string
+  ): Promise<{
+    success: boolean;
+    videoData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    
+    const apiUrl = 'https://snap-video3.p.rapidapi.com/download';
+    const host = 'snap-video3.p.rapidapi.com';
+
+    try {
+      // Create form data with URL parameter
+      const formData = new URLSearchParams();
+      formData.append('url', url);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        body: formData.toString(),
+        signal: AbortSignal.timeout(FREE_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        if (response.status === 429) {
+          return {
+            success: false,
+            reason: 'RATE_LIMIT',
+            message: 'Free API rate limit exceeded',
+          };
+        }
+        if (response.status === 403) {
+          return {
+            success: false,
+            reason: 'QUOTA_EXCEEDED',
+            message: 'Free API quota exceeded or disabled',
+          };
+        }
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const errorMessage = (data.error || data.message || '').toLowerCase();
+      
+      // 检查额度/限额
+      if (
+        errorMessage.includes('quota') ||
+        errorMessage.includes('limit') ||
+        errorMessage.includes('free plan disabled') ||
+        errorMessage.includes('exceeded')
+      ) {
+        return {
+          success: false,
+          reason: 'QUOTA_EXCEEDED',
+          message: 'Free API quota exceeded or disabled',
+        };
+      }
+
+      // 数据层面失败判断
+      // 尝试提取视频URL（可能在不同字段中）
+      const videoUrl =
+        data.data?.play ||
+        data.data?.download_addr ||
+        data.data?.video_url ||
+        data.data?.video?.play ||
+        data.data?.video?.download_addr ||
+        data.data?.nwm_video_url ||
+        data.data?.no_watermark ||
+        data.play ||
+        data.download_addr ||
+        data.video_url ||
+        data.video?.play ||
+        data.video?.download_addr ||
+        data.nwm_video_url ||
+        data.no_watermark ||
+        data.download ||
+        data.url;
+
+      // 检查是否有视频URL
+      if (!videoUrl || videoUrl.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_VIDEO_URL',
+          message: 'No video URL available in response',
+        };
+      }
+
+      // 检查视频URL是否有效（应该是http/https链接）
+      if (!videoUrl.startsWith('http://') && !videoUrl.startsWith('https://')) {
+        return {
+          success: false,
+          reason: 'INVALID_VIDEO_URL',
+          message: 'Invalid video URL format',
+        };
+      }
+
+      // ✅ 成功：返回视频数据
+      return {
+        success: true,
+        videoData: data,
+        metadata: {
+          title: data.title,
+          author: data.author,
+          description: data.description,
+        },
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Free API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch TikTok video download via Paid API (TikTok Video No Watermark)
+   * Only called once per request (as fallback)
+   * @param url TikTok video URL
+   * @returns Result with video data or failure reason
+   */
+  private async fetchTikTokVideoDownloadPaidAPI(
+    url: string
+  ): Promise<{
+    success: boolean;
+    videoData?: any;
+    metadata?: any;
+    reason?: string;
+    message?: string;
+  }> {
+    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    
+    const apiUrl = 'https://tiktok-video-no-watermark2.p.rapidapi.com/';
+    const host = 'tiktok-video-no-watermark2.p.rapidapi.com';
+
+    try {
+      // Create form data with URL parameter
+      const formData = new URLSearchParams();
+      formData.append('url', url);
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-rapidapi-key': this.configs.apiKey,
+          'x-rapidapi-host': host,
+        },
+        body: formData.toString(),
+        signal: AbortSignal.timeout(PAID_API_TIMEOUT),
+      });
+
+      // HTTP层面失败判断
+      if (!response.ok) {
+        return {
+          success: false,
+          reason: 'HTTP_ERROR',
+          message: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      // 业务层面失败判断
+      const errorMsg = data.error || data.message || '';
+
+      // 尝试提取视频URL（可能在不同字段中）
+      const videoUrl =
+        data.data?.play ||
+        data.data?.download_addr ||
+        data.data?.video_url ||
+        data.data?.video?.play ||
+        data.data?.video?.download_addr ||
+        data.data?.nwm_video_url ||
+        data.data?.no_watermark ||
+        data.play ||
+        data.download_addr ||
+        data.video_url ||
+        data.video?.play ||
+        data.video?.download_addr ||
+        data.nwm_video_url ||
+        data.no_watermark ||
+        data.download ||
+        data.url;
+
+      if (!videoUrl || videoUrl.trim().length === 0) {
+        return {
+          success: false,
+          reason: 'NO_VIDEO_URL',
+          message: errorMsg || 'No video URL available',
+        };
+      }
+
+      // 检查视频URL是否有效
+      if (!videoUrl.startsWith('http://') && !videoUrl.startsWith('https://')) {
+        return {
+          success: false,
+          reason: 'INVALID_VIDEO_URL',
+          message: 'Invalid video URL format',
+        };
+      }
+
+      // 检查特定错误信息
+      const errorMessage = errorMsg.toLowerCase();
+      if (
+        errorMessage.includes('video not found') ||
+        errorMessage.includes('invalid url')
+      ) {
+        return {
+          success: false,
+          reason: 'VIDEO_NOT_FOUND',
+          message: 'Video not found or invalid URL',
+        };
+      }
+
+      if (
+        errorMessage.includes('private video') ||
+        errorMessage.includes('access denied')
+      ) {
+        return {
+          success: false,
+          reason: 'PRIVATE_VIDEO',
+          message: 'Video is private or access denied',
+        };
+      }
+
+      // ✅ 成功：返回视频数据
+      return {
+        success: true,
+        videoData: data,
+        metadata: {},
+      };
+    } catch (error: any) {
+      // 网络错误/超时
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          reason: 'TIMEOUT',
+          message: 'Paid API request timeout',
+        };
+      }
+      return {
+        success: false,
+        reason: 'NETWORK_ERROR',
+        message: error.message || 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Fetch TikTok video download via RapidAPI (Legacy method, kept for compatibility)
    * Uses the video download API endpoint (POST request with form data)
    * API: https://tiktok-video-no-watermark2.p.rapidapi.com/
    * @param url TikTok video URL
    * @param host RapidAPI host
    * @returns Video download data
+   * @deprecated Use fetchTikTokVideoDownloadFreeAPI or fetchTikTokVideoDownloadPaidAPI instead
    */
   private async fetchTikTokVideoDownload(url: string, host: string): Promise<any> {
     // Call TikTok video download API using POST with form data
