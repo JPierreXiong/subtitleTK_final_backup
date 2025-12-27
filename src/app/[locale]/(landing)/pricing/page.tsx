@@ -46,7 +46,7 @@ export default async function PricingPage({
   const pricing: PricingType = t.raw('pricing');
   const faq: FAQType = tl.raw('faq');
   // Hide testimonials section
-  const testimonials: TestimonialsType = undefined;
+  const testimonials: TestimonialsType | null = null;
 
   return (
     <Page
