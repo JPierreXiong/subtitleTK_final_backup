@@ -7,6 +7,9 @@ import { db } from '../src/core/db';
 import { mediaTasks } from '../src/config/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 
+// Type inference from schema
+type MediaTaskRow = typeof mediaTasks.$inferSelect;
+
 async function checkMediaTasksVideoUrls() {
   try {
     console.log('🔍 Checking media_tasks table for video URL data...\n');
@@ -29,7 +32,7 @@ async function checkMediaTasksVideoUrls() {
 
     if (recentTikTokVideoTasks.length > 0) {
       console.log('Recent TikTok Video Tasks:');
-      recentTikTokVideoTasks.forEach((task, index) => {
+      recentTikTokVideoTasks.forEach((task: MediaTaskRow, index: number) => {
         console.log(`\n  Task ${index + 1}:`);
         console.log(`    ID: ${task.id}`);
         console.log(`    Status: ${task.status}`);
@@ -72,7 +75,7 @@ async function checkMediaTasksVideoUrls() {
 
     if (recentYouTubeVideoTasks.length > 0) {
       console.log('Recent YouTube Video Tasks:');
-      recentYouTubeVideoTasks.forEach((task, index) => {
+      recentYouTubeVideoTasks.forEach((task: MediaTaskRow, index: number) => {
         console.log(`\n  Task ${index + 1}:`);
         console.log(`    ID: ${task.id}`);
         console.log(`    Status: ${task.status}`);
