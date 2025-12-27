@@ -27,7 +27,7 @@ async function checkData() {
       const samples = await sql`SELECT * FROM testimonial LIMIT 5`;
       samples.forEach((row: any, idx: number) => {
         console.log(`\n  Row ${idx + 1}:`);
-        Object.entries(row).forEach(([key, value]) => {
+        Object.entries(row).forEach(([key, value]: [string, unknown]) => {
           console.log(`    ${key}: ${value}`);
         });
       });

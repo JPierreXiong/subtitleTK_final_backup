@@ -39,7 +39,7 @@ async function testTestimonialsModel() {
       findTestimonialById,
     ] as Function[];
     
-    functions.forEach((fn) => {
+    functions.forEach((fn: Function) => {
       if (typeof fn !== 'function') {
         throw new Error('Function is not a function');
       }

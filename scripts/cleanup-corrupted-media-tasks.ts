@@ -9,6 +9,9 @@ import { db } from '../src/core/db';
 import { mediaTasks } from '../src/config/db/schema';
 import { eq, and, or, isNull, sql } from 'drizzle-orm';
 
+// Type inference from schema for selected fields
+type MediaTaskRow = typeof mediaTasks.$inferSelect;
+
 async function cleanupCorruptedTasks() {
   try {
     console.log('🧹 Starting cleanup of corrupted media tasks...\n');
@@ -71,7 +74,7 @@ async function cleanupCorruptedTasks() {
     // Display details
     if (youtubeNullTasks.length > 0) {
       console.log('📋 YouTube tasks with NULL videoUrlInternal:');
-      youtubeNullTasks.forEach((task, index) => {
+      youtubeNullTasks.forEach((task: MediaTaskRow, index: number) => {
         console.log(`   ${index + 1}. Task ${task.id}`);
         console.log(`      Status: ${task.status}, Created: ${task.createdAt}`);
       });
@@ -80,7 +83,7 @@ async function cleanupCorruptedTasks() {
 
     if (truncatedTasks.length > 0) {
       console.log('📋 Tasks with truncated "https" videoUrlInternal:');
-      truncatedTasks.forEach((task, index) => {
+      truncatedTasks.forEach((task: MediaTaskRow, index: number) => {
         console.log(`   ${index + 1}. Task ${task.id} (${task.platform})`);
         console.log(`      Status: ${task.status}, Created: ${task.createdAt}`);
       });
