@@ -10,6 +10,24 @@ import { SubtitleFormatter } from './subtitle-formatter';
  */
 export interface RapidAPIConfigs {
   apiKey: string;
+  // 主备配置（从环境变量读取）
+  tiktokTranscript?: {
+    primaryHost: string;
+    backupHost: string;
+  };
+  tiktokVideo?: {
+    primaryHost: string;
+    backupHost: string;
+  };
+  youtubeTranscript?: {
+    primaryHost: string;
+    backupHost: string;
+  };
+  youtubeVideo?: {
+    primaryHost: string;
+    backupHost: string;
+  };
+  // 向后兼容的旧配置（如果新配置不存在，使用这些）
   hostTikTokDownload?: string;
   hostTikTokTranscript?: string;
   hostYouTubeTranscript?: string;
@@ -190,7 +208,9 @@ export class RapidAPIProvider {
     // Format URL (convert shorts to watch format for API compatibility)
     const formattedUrl = this.formatYouTubeUrl(url);
     
+    // 使用配置中的主 API Host（从环境变量读取）
     const downloadHost =
+      this.configs.youtubeVideo?.primaryHost ||
       this.configs.hostYouTubeDownload ||
       'youtube-video-and-shorts-downloader1.p.rapidapi.com';
 
@@ -546,8 +566,11 @@ export class RapidAPIProvider {
     const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
     const MIN_TRANSCRIPT_LENGTH = 300; // Minimum transcript length (characters)
     
-    const apiUrl = `https://youtube-video-summarizer-gpt-ai.p.rapidapi.com/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`;
-    const host = 'youtube-video-summarizer-gpt-ai.p.rapidapi.com';
+    // 使用配置中的主 API Host（从环境变量读取）
+    const host = this.configs.youtubeTranscript?.primaryHost || 
+                 this.configs.hostYouTubeTranscript || 
+                 'youtube-video-summarizer-gpt-ai.p.rapidapi.com';
+    const apiUrl = `https://${host}/api/v1/get-transcript-v2?video_id=${videoId}&platform=youtube`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -669,8 +692,11 @@ export class RapidAPIProvider {
   }> {
     const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
     
-    const apiUrl = 'https://youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com/transcribe';
-    const host = 'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com';
+    // 使用配置中的备 API Host（从环境变量读取）
+    const host = this.configs.youtubeTranscript?.backupHost || 
+                 this.configs.hostYouTubeTranscript || 
+                 'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com';
+    const apiUrl = `https://${host}/transcribe`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -816,8 +842,11 @@ export class RapidAPIProvider {
     const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
     const MIN_TRANSCRIPT_LENGTH = 100; // Minimum transcript length (characters) - TikTok videos are usually shorter
     
-    const apiUrl = 'https://tiktok-transcriptor-api3.p.rapidapi.com/index.php';
-    const host = 'tiktok-transcriptor-api3.p.rapidapi.com';
+    // 使用配置中的主 API Host（从环境变量读取）
+    const host = this.configs.tiktokTranscript?.primaryHost || 
+                 this.configs.hostTikTokTranscript || 
+                 'tiktok-transcriptor-api3.p.rapidapi.com';
+    const apiUrl = `https://${host}/index.php`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -948,8 +977,11 @@ export class RapidAPIProvider {
   }> {
     const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
     
-    const apiUrl = 'https://tiktok-transcript.p.rapidapi.com/transcribe-tiktok-audio';
-    const host = 'tiktok-transcript.p.rapidapi.com';
+    // 使用配置中的备 API Host（从环境变量读取）
+    const host = this.configs.tiktokTranscript?.backupHost || 
+                 this.configs.hostTikTokTranscript || 
+                 'tiktok-transcript.p.rapidapi.com';
+    const apiUrl = `https://${host}/transcribe-tiktok-audio`;
 
     try {
       // Note: This API uses form-urlencoded format
@@ -1252,8 +1284,11 @@ export class RapidAPIProvider {
   }> {
     const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
     
-    const apiUrl = 'https://snap-video3.p.rapidapi.com/download';
-    const host = 'snap-video3.p.rapidapi.com';
+    // 使用配置中的主 API Host（从环境变量读取）
+    const host = this.configs.tiktokVideo?.primaryHost || 
+                 this.configs.hostTikTokDownload || 
+                 'snap-video3.p.rapidapi.com';
+    const apiUrl = `https://${host}/download`;
 
     try {
       // Create form data with URL parameter
@@ -1395,8 +1430,11 @@ export class RapidAPIProvider {
   }> {
     const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
     
-    const apiUrl = 'https://tiktok-video-no-watermark2.p.rapidapi.com/';
-    const host = 'tiktok-video-no-watermark2.p.rapidapi.com';
+    // 使用配置中的备 API Host（从环境变量读取）
+    const host = this.configs.tiktokVideo?.backupHost || 
+                 this.configs.hostTikTokDownload || 
+                 'tiktok-video-no-watermark2.p.rapidapi.com';
+    const apiUrl = `https://${host}/`;
 
     try {
       // Create form data with URL parameter

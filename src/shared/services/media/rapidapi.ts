@@ -27,8 +27,54 @@ export function getRapidAPIServiceWithConfigs(
     throw new Error('RapidAPI API key is not configured');
   }
 
+  // 从环境变量读取主备配置（优先级最高）
   const rapidAPIConfigs: RapidAPIConfigs = {
     apiKey,
+    // TikTok 文案提取 - 主备配置
+    tiktokTranscript: {
+      primaryHost:
+        process.env.RAPIDAPI_TIKTOK_TRANSCRIPT_PRIMARY_HOST ||
+        configs.rapidapi_host_tiktok_transcript_primary ||
+        'tiktok-transcriptor-api3.p.rapidapi.com',
+      backupHost:
+        process.env.RAPIDAPI_TIKTOK_TRANSCRIPT_BACKUP_HOST ||
+        configs.rapidapi_host_tiktok_transcript_backup ||
+        'tiktok-transcript.p.rapidapi.com',
+    },
+    // TikTok 视频下载 - 主备配置
+    tiktokVideo: {
+      primaryHost:
+        process.env.RAPIDAPI_TIKTOK_VIDEO_PRIMARY_HOST ||
+        configs.rapidapi_host_tiktok_download_primary ||
+        'snap-video3.p.rapidapi.com',
+      backupHost:
+        process.env.RAPIDAPI_TIKTOK_VIDEO_BACKUP_HOST ||
+        configs.rapidapi_host_tiktok_download_backup ||
+        'tiktok-video-no-watermark2.p.rapidapi.com',
+    },
+    // YouTube 文案提取 - 主备配置
+    youtubeTranscript: {
+      primaryHost:
+        process.env.RAPIDAPI_YOUTUBE_TRANSCRIPT_PRIMARY_HOST ||
+        configs.rapidapi_host_youtube_transcript_primary ||
+        'youtube-video-summarizer-gpt-ai.p.rapidapi.com',
+      backupHost:
+        process.env.RAPIDAPI_YOUTUBE_TRANSCRIPT_BACKUP_HOST ||
+        configs.rapidapi_host_youtube_transcript_backup ||
+        'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com',
+    },
+    // YouTube 视频下载 - 主备配置
+    youtubeVideo: {
+      primaryHost:
+        process.env.RAPIDAPI_YOUTUBE_VIDEO_PRIMARY_HOST ||
+        configs.rapidapi_host_youtube_download_primary ||
+        'youtube-video-and-shorts-downloader1.p.rapidapi.com',
+      backupHost:
+        process.env.RAPIDAPI_YOUTUBE_VIDEO_BACKUP_HOST ||
+        configs.rapidapi_host_youtube_download_backup ||
+        'youtube-video-downloader.p.rapidapi.com',
+    },
+    // 向后兼容的旧配置
     hostTikTokDownload:
       process.env.NEXT_PUBLIC_RAPIDAPI_HOST_TIKTOK_DOWNLOAD ||
       configs.rapidapi_host_tiktok_download ||
