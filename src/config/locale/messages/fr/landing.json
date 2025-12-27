@@ -66,8 +66,8 @@
         "variant": "default"
       }
     ],
-    "show_avatars": true,
-    "avatars_tip": "999+ utilisateurs utilisent Subtitle TK",
+    "show_avatars": false,
+    "avatars_tip": "",
     "show_award": false,
     "image": {
       "src": "/imgs/features/admin.png",
@@ -488,7 +488,7 @@
         {
           "title": "Email",
           "icon": "Mail",
-          "url": "mailto:support@your-domain.com",
+          "url": "mailto:support@subtitletk.app",
           "target": "_self"
         }
       ]
@@ -502,9 +502,14 @@
         {
           "title": "Conditions d'utilisation",
           "url": "/terms-of-service"
+        },
+        {
+          "title": "Avertissement",
+          "url": "/disclaimer"
         }
       ]
     },
+    "copyright": "Subtitle TK est un produit indépendant et n'est pas affilié à Google (YouTube) ou ByteDance (TikTok).",
     "show_theme": true,
     "show_locale": true
   }

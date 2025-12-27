@@ -66,8 +66,8 @@
         "variant": "default"
       }
     ],
-    "show_avatars": true,
-    "avatars_tip": "999+ 用户在使用 Subtitle TK 上站",
+    "show_avatars": false,
+    "avatars_tip": "",
     "show_award": false,
     "image": {
       "src": "/imgs/features/admin.png",
@@ -488,7 +488,7 @@
         {
           "title": "邮箱",
           "icon": "Mail",
-          "url": "mailto:support@your-domain.com",
+          "url": "mailto:support@subtitletk.app",
           "target": "_self"
         }
       ]
@@ -502,9 +502,14 @@
         {
           "title": "服务条款",
           "url": "/terms-of-service"
+        },
+        {
+          "title": "免责声明",
+          "url": "/disclaimer"
         }
       ]
     },
+    "copyright": "Subtitle TK 是独立产品，与 Google (YouTube) 或 ByteDance (TikTok) 无关联。",
     "show_theme": true,
     "show_locale": true
   }

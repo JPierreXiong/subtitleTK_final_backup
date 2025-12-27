@@ -68,7 +68,7 @@
       }
     ],
     "show_avatars": false,
-    "avatars_tip": "999+ users are using Subtitle TK",
+    "avatars_tip": "",
     "show_award": false,
     "image": {
       "src": "/imgs/features/admin.png",
@@ -441,6 +441,7 @@
       "description": "Subtitle TK is a professional video content analysis and multi-language transcript extraction tool. We empower content creators, researchers, and language learners by providing seamless access to video metadata. Our mission is to facilitate cross-cultural communication and knowledge sharing through advanced translation technology.",
       "url": "/"
     },
+    "copyright": "Subtitle TK is an independent product and is not affiliated with Google (YouTube) or ByteDance (TikTok).",
     "nav": {
       "items": [
         {
@@ -493,7 +494,7 @@
         {
           "title": "Email",
           "icon": "Mail",
-          "url": "mailto:support@your-domain.com",
+          "url": "mailto:support@subtitletk.app",
           "target": "_self"
         }
       ]
