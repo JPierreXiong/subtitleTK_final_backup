@@ -103,7 +103,7 @@ async function checkSessionStatus() {
     console.log('📋 步骤 4: 检查 Session 与用户的关联');
     console.log('----------------------------------------');
     if (validSessions.length > 0) {
-      const userIds = [...new Set(validSessions.map(s => s.userId))];
+      const userIds = Array.from(new Set(validSessions.map((s: any) => s.userId)));
       console.log(`有 ${userIds.length} 个用户有有效 Session`);
       console.log('');
 
@@ -111,7 +111,7 @@ async function checkSessionStatus() {
         const userInfo = await database
           .select()
           .from(user)
-          .where(eq(user.id, userId))
+          .where(eq(user.id, userId as string))
           .limit(1);
 
         if (userInfo.length > 0) {
