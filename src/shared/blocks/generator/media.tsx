@@ -553,7 +553,7 @@ export function MediaExtractor({
       return 'Gemini is translating (approx. 1 min)...';
     }
     if (taskStatus.status === 'processing') {
-      return 'Fetching metadata & media (approx. 3 mins)...';
+      return 'Extracting media... This may take up to 2 minutes.';
     }
     if (taskStatus.status === 'extracted') {
       return 'Extraction successful! You can now translate.';

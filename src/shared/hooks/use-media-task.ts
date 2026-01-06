@@ -31,8 +31,9 @@ export interface MediaTaskStatus {
   updatedAt?: string;
 }
 
-const POLL_INTERVAL = 3000; // 3 seconds
-const GENERATION_TIMEOUT = 300000; // 5 minutes
+// 前端轮询策略（防尸体任务）
+const POLL_INTERVAL = 2000; // 2 seconds (标准轮询间隔)
+const HARD_TIMEOUT = 120000; // 2 minutes (前端硬超时，防止无限等待)
 
 export function useMediaTask() {
   const [task, setTask] = useState<MediaTaskStatus | null>(null);
@@ -50,16 +51,17 @@ export function useMediaTask() {
     setIsPolling(false);
   }, []);
 
-  // Poll status function
+  // Poll status function (防尸体任务版)
   const pollStatus = useCallback(async (taskId: string): Promise<boolean> => {
     try {
-      // Check timeout
+      // ⛔ 前端硬超时检查（防尸体核心）
+      // 前端永远不能假设后端一定活着，只相信时间和最终态
       if (generationStartTimeRef.current) {
         const elapsedTime = Date.now() - generationStartTimeRef.current;
-        if (elapsedTime > GENERATION_TIMEOUT) {
+        if (elapsedTime > HARD_TIMEOUT) {
           stopPolling();
-          setError('Task timed out. Please try again.');
-          toast.error('Task timed out. Please try again.');
+          setError('Task timed out. Your credits were not consumed. Please try again.');
+          toast.error('The task took too long and was stopped. Your credits were not consumed.');
           return true;
         }
       }
@@ -79,6 +81,8 @@ export function useMediaTask() {
       setError(null);
 
       // Stop polling for final states
+      // 处理所有最终态：completed, failed, extracted
+      // timeout 是逻辑状态，存储为 failed，通过 error_message 识别
       if (
         taskData.status === 'completed' ||
         taskData.status === 'failed' ||
@@ -87,8 +91,19 @@ export function useMediaTask() {
         stopPolling();
 
         if (taskData.status === 'failed') {
-          setError(taskData.errorMessage || 'Task failed');
-          toast.error(`Task failed: ${taskData.errorMessage || 'Unknown error'}`);
+          // 检查是否是 timeout 失败（通过 error_message）
+          const isTimeout = taskData.errorMessage?.includes('timeout') && 
+                           taskData.errorMessage?.includes('watchdog');
+          
+          if (isTimeout) {
+            // timeout 失败：系统级失败，积分已退款
+            setError('Task timed out. Your credits were not consumed.');
+            toast.error('The task took too long and was stopped. Your credits were not consumed.');
+          } else {
+            // 普通失败：业务失败
+            setError(taskData.errorMessage || 'Task failed');
+            toast.error(`Task failed: ${taskData.errorMessage || 'Unknown error'}`);
+          }
         } else if (taskData.status === 'extracted') {
           toast.success('Extraction completed! You can now translate.');
         } else if (taskData.status === 'completed') {
@@ -96,6 +111,9 @@ export function useMediaTask() {
         }
         return true;
       }
+
+      // pending / processing → 继续轮询
+      // 前端只相信时间和最终态，不假设 processing 一定会结束
 
       return false; // Continue polling
     } catch (err: any) {

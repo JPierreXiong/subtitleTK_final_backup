@@ -22,6 +22,7 @@ export type MediaTaskStatus =
   | 'translating'
   | 'completed'
   | 'failed';
+// Note: 'timeout' is a logical state, stored as 'failed' with error_message = 'Task timeout (watchdog)'
 
 /**
  * Create a new media task with credit consumption
@@ -89,7 +90,8 @@ export async function updateMediaTaskById(
   updateMediaTask: UpdateMediaTask
 ) {
   const result = await db().transaction(async (tx: any) => {
-    // Task failed, refund credit consumption record
+    // Task failed (including timeout), refund credit consumption record
+    // Note: timeout is stored as 'failed' with error_message containing 'timeout'
     if (updateMediaTask.status === 'failed') {
       // Get creditId from updateMediaTask or from existing task
       let creditIdToRefund = updateMediaTask.creditId;

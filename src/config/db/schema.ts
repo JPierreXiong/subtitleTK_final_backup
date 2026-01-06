@@ -604,6 +604,9 @@ export const mediaTasks = pgTable(
     index('idx_media_task_platform_status').on(table.platform, table.status),
     // New index: Query expired videos
     index('idx_media_task_expires').on(table.expiresAt),
+    // Watchdog index: Query timeout tasks (status = processing AND updated_at < threshold)
+    // Using updated_at instead of started_at (soft constraint, no schema change)
+    index('idx_media_task_watchdog').on(table.status, table.updatedAt),
   ]
 );
 

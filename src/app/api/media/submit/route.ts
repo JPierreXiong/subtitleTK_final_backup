@@ -48,6 +48,8 @@ async function processMediaTask(
     // No need to consume again here
 
     // Update status to processing
+    // updated_at will be automatically updated (ShipAny behavior)
+    // Watchdog uses updated_at to detect timeout (soft constraint, no schema change)
     await updateMediaTaskById(taskId, {
       status: 'processing',
       progress: 10,
