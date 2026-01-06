@@ -32,6 +32,7 @@ import {
   findValidVideoCache,
   setVideoCache,
 } from '@/shared/models/video_cache';
+import { sendTaskHeartbeat } from '@/shared/utils/task-heartbeat';
 
 /**
  * Process media task asynchronously
@@ -135,7 +136,6 @@ async function processMediaTask(
     
     // 💓 Heartbeat: Send heartbeat before long-running API call
     // This prevents watchdog from killing tasks that are actually running
-    const { sendTaskHeartbeat } = await import('@/shared/utils/task-heartbeat');
     await sendTaskHeartbeat(taskId, 20); // Update progress to 20, heartbeat updated_at
 
     // Add overall timeout protection (8 seconds max for Vercel Free tier)

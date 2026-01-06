@@ -135,3 +135,4 @@ Write-Host "  2. 切换回 Pooler 连接（在 .env.local 中）"
 Write-Host "  3. 测试应用功能"
 
 
+

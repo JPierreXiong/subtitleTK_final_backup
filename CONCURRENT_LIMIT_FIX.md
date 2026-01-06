@@ -82,3 +82,4 @@ lt(mediaTasks.updatedAt, timeoutThreshold)
 - `src/shared/models/media_task.ts` - `getActiveMediaTasks` 函数（只计算 processing/translating）
 - `src/shared/services/media/plan-limits.ts` - 并发限制检查逻辑
 
+

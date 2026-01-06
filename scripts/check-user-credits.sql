@@ -76,3 +76,4 @@ ORDER BY u.email, c.transaction_type, c.status;
 -- 3. active_consume_records: 活跃的积分消费记录数
 -- ============================================
 
+

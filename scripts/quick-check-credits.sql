@@ -24,3 +24,4 @@ WHERE u.email IN ('xiongjp_fr@163.com', 'xiongjp_fr@hotmail.com')
 GROUP BY u.email, u.id, u.name
 ORDER BY u.email;
 
+

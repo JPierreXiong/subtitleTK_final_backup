@@ -143,6 +143,9 @@ export function sanitizeProgress(progress: any): number {
 /**
  * Sanitize media task update data
  * This is the main function to use before calling updateMediaTaskById
+ * 
+ * Note: Returns undefined for null values to match TypeScript types
+ * (Drizzle expects undefined for optional fields, not null)
  */
 export function sanitizeMediaTaskUpdate(data: {
   duration?: any;
@@ -157,39 +160,64 @@ export function sanitizeMediaTaskUpdate(data: {
   [key: string]: any;
 }): {
   duration?: number | null;
-  thumbnailUrl?: string | null;
-  videoUrl?: string | null;
-  author?: string | null;
-  title?: string | null;
+  thumbnailUrl?: string | undefined;
+  videoUrl?: string | undefined;
+  author?: string | undefined;
+  title?: string | undefined;
   progress?: number;
-  likes?: number | null;
-  views?: number | null;
-  shares?: number | null;
+  likes?: number | undefined;
+  views?: number | undefined;
+  shares?: number | undefined;
   [key: string]: any;
 } {
   const sanitized: any = { ...data };
 
   // Sanitize duration (convert "00:28" to 28)
   if ('duration' in sanitized) {
-    sanitized.duration = parseDurationToSeconds(sanitized.duration);
+    const durationValue = parseDurationToSeconds(sanitized.duration);
+    if (durationValue === null) {
+      delete sanitized.duration; // Remove null values
+    } else {
+      sanitized.duration = durationValue;
+    }
   }
 
-  // Sanitize URLs
+  // Sanitize URLs (convert null to undefined for TypeScript compatibility)
   if ('thumbnailUrl' in sanitized) {
-    sanitized.thumbnailUrl = sanitizeUrl(sanitized.thumbnailUrl);
+    const urlValue = sanitizeUrl(sanitized.thumbnailUrl);
+    if (urlValue === null) {
+      delete sanitized.thumbnailUrl; // Remove null values
+    } else {
+      sanitized.thumbnailUrl = urlValue;
+    }
   }
 
   if ('videoUrl' in sanitized) {
-    sanitized.videoUrl = sanitizeUrl(sanitized.videoUrl);
+    const urlValue = sanitizeUrl(sanitized.videoUrl);
+    if (urlValue === null) {
+      delete sanitized.videoUrl; // Remove null values (videoUrl is notNull in schema)
+    } else {
+      sanitized.videoUrl = urlValue;
+    }
   }
 
-  // Sanitize text fields (convert empty string to null)
+  // Sanitize text fields (convert null to undefined)
   if ('author' in sanitized) {
-    sanitized.author = sanitizeText(sanitized.author);
+    const textValue = sanitizeText(sanitized.author);
+    if (textValue === null) {
+      delete sanitized.author; // Remove null values
+    } else {
+      sanitized.author = textValue;
+    }
   }
 
   if ('title' in sanitized) {
-    sanitized.title = sanitizeText(sanitized.title);
+    const textValue = sanitizeText(sanitized.title);
+    if (textValue === null) {
+      delete sanitized.title; // Remove null values
+    } else {
+      sanitized.title = textValue;
+    }
   }
 
   // Sanitize progress (ensure 0-100)
@@ -197,17 +225,32 @@ export function sanitizeMediaTaskUpdate(data: {
     sanitized.progress = sanitizeProgress(sanitized.progress);
   }
 
-  // Sanitize integer fields
+  // Sanitize integer fields (convert null to undefined)
   if ('likes' in sanitized) {
-    sanitized.likes = sanitizeInteger(sanitized.likes);
+    const intValue = sanitizeInteger(sanitized.likes);
+    if (intValue === null) {
+      delete sanitized.likes; // Remove null values
+    } else {
+      sanitized.likes = intValue;
+    }
   }
 
   if ('views' in sanitized) {
-    sanitized.views = sanitizeInteger(sanitized.views);
+    const intValue = sanitizeInteger(sanitized.views);
+    if (intValue === null) {
+      delete sanitized.views; // Remove null values
+    } else {
+      sanitized.views = intValue;
+    }
   }
 
   if ('shares' in sanitized) {
-    sanitized.shares = sanitizeInteger(sanitized.shares);
+    const intValue = sanitizeInteger(sanitized.shares);
+    if (intValue === null) {
+      delete sanitized.shares; // Remove null values
+    } else {
+      sanitized.shares = intValue;
+    }
   }
 
   return sanitized;

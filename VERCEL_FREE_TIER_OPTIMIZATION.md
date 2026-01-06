@@ -145,3 +145,4 @@ setTimeout(() => {
 - `src/app/api/media/status/route.ts` - 任务状态查询（已有超时保护）
 - `vercel.json` - Vercel 配置（Free 版不支持超过 10 秒）
 
+
