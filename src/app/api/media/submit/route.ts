@@ -431,43 +431,100 @@ export async function POST(request: NextRequest) {
       await createMediaTask(newTask, requiredCredits);
     }
 
-    // Start async processing with setTimeout to ensure main thread returns quickly
-    // This is critical for Vercel Free tier (10 second limit)
-    // Use setTimeout to defer the actual processing, allowing the response to return immediately
-    setTimeout(() => {
-      processMediaTask(
-        taskId,
-        url,
-        outputType || 'subtitle',
-        currentUser.id
-      ).catch(async (error) => {
-        console.error('[Background Task Failed]', {
+    // Start async processing
+    // Option 1: Use Worker/Queue (if enabled)
+    // Option 2: Use setTimeout (fallback for compatibility)
+    const { isWorkerEnabled, enqueueMediaTask } = await import('@/shared/services/queue/qstash');
+    
+    if (isWorkerEnabled()) {
+      // Use Worker via QStash Queue
+      try {
+        await enqueueMediaTask(
           taskId,
           url,
-          outputType,
-          error: error.message,
-          stack: error.stack,
+          outputType || 'subtitle',
+          currentUser.id
+        );
+        console.log(`[Queue] Task ${taskId} enqueued to Worker`);
+      } catch (queueError: any) {
+        console.error('[Queue Error]', {
+          taskId,
+          error: queueError.message,
         });
-        
-        // Update task status to failed if background task fails
-        // Get task to retrieve creditId for refund
-        try {
-          const failedTask = await findMediaTaskById(taskId);
-          await updateMediaTaskById(taskId, {
-            status: 'failed',
-            errorMessage: error.message || 'Background processing failed',
-            progress: 0,
-            creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
-          });
-          console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
-        } catch (updateError: any) {
-          console.error('[Failed to Update Task Status]', {
+        // Fallback to setTimeout if queue fails
+        console.log(`[Fallback] Using setTimeout for task ${taskId}`);
+        setTimeout(() => {
+          processMediaTask(
             taskId,
-            updateError: updateError.message,
+            url,
+            outputType || 'subtitle',
+            currentUser.id
+          ).catch(async (error) => {
+            console.error('[Background Task Failed]', {
+              taskId,
+              url,
+              outputType,
+              error: error.message,
+              stack: error.stack,
+            });
+            
+            try {
+              const failedTask = await findMediaTaskById(taskId);
+              await updateMediaTaskById(taskId, {
+                status: 'failed',
+                errorMessage: error.message || 'Background processing failed',
+                progress: 0,
+                creditId: failedTask?.creditId || null,
+              });
+              console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+            } catch (updateError: any) {
+              console.error('[Failed to Update Task Status]', {
+                taskId,
+                updateError: updateError.message,
+              });
+            }
           });
-        }
-      });
-    }, 100); // Defer by 100ms to ensure response is sent first
+        }, 100);
+      }
+    } else {
+      // Use setTimeout (original behavior)
+      // This is critical for Vercel Free tier (10 second limit)
+      // Use setTimeout to defer the actual processing, allowing the response to return immediately
+      setTimeout(() => {
+        processMediaTask(
+          taskId,
+          url,
+          outputType || 'subtitle',
+          currentUser.id
+        ).catch(async (error) => {
+          console.error('[Background Task Failed]', {
+            taskId,
+            url,
+            outputType,
+            error: error.message,
+            stack: error.stack,
+          });
+          
+          // Update task status to failed if background task fails
+          // Get task to retrieve creditId for refund
+          try {
+            const failedTask = await findMediaTaskById(taskId);
+            await updateMediaTaskById(taskId, {
+              status: 'failed',
+              errorMessage: error.message || 'Background processing failed',
+              progress: 0,
+              creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
+            });
+            console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+          } catch (updateError: any) {
+            console.error('[Failed to Update Task Status]', {
+              taskId,
+              updateError: updateError.message,
+            });
+          }
+        });
+      }, 100); // Defer by 100ms to ensure response is sent first
+    }
 
     // Immediately return task ID
     return respData({
