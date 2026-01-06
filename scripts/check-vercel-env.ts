@@ -5,6 +5,9 @@
  * 需要设置 VERCEL_TOKEN 环境变量或使用 Vercel CLI 登录
  */
 
+// 使文件成为模块，避免全局作用域冲突
+export {};
+
 // 支持从命令行参数或环境变量获取 token
 const VERCEL_TOKEN = process.argv[2] || process.env.VERCEL_TOKEN || process.env.token;
 const VERCEL_TEAM = process.env.VERCEL_TEAM; // 可选
@@ -227,7 +230,7 @@ async function checkVercelEnv() {
       const envVar = envVars.find(e => e.key === key);
       const check = checkEnvVar(envVar || { key: '', value: '' } as VercelEnvVar, key, config.pattern);
       
-      if (!check.exists) {
+      if (!check.exists || !envVar) {
         console.log(`❌ ${key}: 未设置`);
         console.log(`   ${config.description}`);
         allCorrect = false;
