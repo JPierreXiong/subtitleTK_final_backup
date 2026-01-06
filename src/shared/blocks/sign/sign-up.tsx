@@ -117,7 +117,38 @@ export function SignUp({
           router.push(callbackUrl);
         },
         onError: (e: any) => {
-          toast.error(e?.error?.message || 'sign up failed');
+          // 检查是否是邮箱已存在的错误
+          const errorMessage = e?.error?.message || e?.message || '';
+          const errorCode = e?.error?.code || '';
+          const statusCode = e?.response?.status || e?.status || e?.error?.status;
+          
+          // Better-auth 通常返回 422 状态码和特定的错误消息
+          // 检查多种可能的错误格式
+          const isEmailExistsError = 
+            statusCode === 422 ||
+            errorCode === 'EMAIL_ALREADY_EXISTS' ||
+            errorCode === 'DUPLICATE_EMAIL' ||
+            errorCode === 'UNIQUE_CONSTRAINT_VIOLATION' ||
+            (errorMessage.toLowerCase().includes('email') && 
+             (errorMessage.toLowerCase().includes('already') || 
+              errorMessage.toLowerCase().includes('exists') ||
+              errorMessage.toLowerCase().includes('duplicate') ||
+              errorMessage.toLowerCase().includes('taken') ||
+              errorMessage.toLowerCase().includes('unique')));
+          
+          if (isEmailExistsError) {
+            // 邮箱已存在，显示友好提示，包含跳转到登录页的按钮
+            toast.error(t('email_already_exists'), {
+              duration: 6000,
+              action: {
+                label: t('sign_in_title'),
+                onClick: () => router.push('/sign-in'),
+              },
+            });
+          } else {
+            // 其他错误，显示原始错误消息
+            toast.error(errorMessage || t('sign_up_failed'));
+          }
           setLoading(false);
         },
       }

@@ -28,7 +28,9 @@
     "name_title": "姓名",
     "name_placeholder": "请输入您的姓名",
     "admin_title": "管理后台",
-    "credits_title": "积分: {credits}"
+    "credits_title": "积分: {credits}",
+    "email_already_exists": "该邮箱已被注册。请直接登录或使用其他邮箱注册。",
+    "sign_up_failed": "注册失败"
   },
   "payment": {
     "choose_payment_method": "选择支付方式",

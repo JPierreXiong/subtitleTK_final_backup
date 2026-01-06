@@ -127,7 +127,19 @@ async function processMediaTask(
 
     // ❌ Cache miss: Normal API call flow
     console.log(`[Cache Miss] Fetching from RapidAPI for ${url}`);
-    const mediaData = await fetchMediaFromRapidAPI(url, outputType || 'subtitle');
+    
+    // Add overall timeout protection (4 minutes max, leaving buffer for Vercel's 180s limit)
+    const API_CALL_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('API call timeout: Request took longer than 4 minutes'));
+      }, API_CALL_TIMEOUT);
+    });
+    
+    const mediaData = await Promise.race([
+      fetchMediaFromRapidAPI(url, outputType || 'subtitle'),
+      timeoutPromise,
+    ]);
 
     // Step 2: Cache the video download URL if this is a video task
     if (outputType === 'video' && mediaData.videoUrl) {
@@ -222,15 +234,31 @@ async function processMediaTask(
       expiresAt: expiresAt,
     });
   } catch (error: any) {
-    console.error('Media task processing failed:', error);
-    // Get task to retrieve creditId for refund
-    const failedTask = await findMediaTaskById(taskId);
-    await updateMediaTaskById(taskId, {
-      status: 'failed',
-      errorMessage: error.message || 'Unknown error occurred',
-      progress: 0,
-      creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
+    console.error('[Media Task Processing Failed]', {
+      taskId,
+      url,
+      outputType,
+      error: error.message,
+      errorName: error.name,
+      stack: error.stack,
     });
+    
+    // Get task to retrieve creditId for refund
+    try {
+      const failedTask = await findMediaTaskById(taskId);
+      await updateMediaTaskById(taskId, {
+        status: 'failed',
+        errorMessage: error.message || 'Unknown error occurred',
+        progress: 0,
+        creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
+      });
+      console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+    } catch (updateError: any) {
+      console.error('[Failed to Update Task Status]', {
+        taskId,
+        updateError: updateError.message,
+      });
+    }
   }
 }
 
@@ -346,18 +374,31 @@ export async function POST(request: NextRequest) {
       outputType || 'subtitle',
       currentUser.id
     ).catch(async (error) => {
-      console.error('Background task failed:', error);
+      console.error('[Background Task Failed]', {
+        taskId,
+        url,
+        outputType,
+        error: error.message,
+        stack: error.stack,
+      });
+      
       // Update task status to failed if background task fails
       // Get task to retrieve creditId for refund
-      const failedTask = await findMediaTaskById(taskId);
-      await updateMediaTaskById(taskId, {
-        status: 'failed',
-        errorMessage: error.message || 'Background processing failed',
-        progress: 0,
-        creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
-      }).catch((updateError) => {
-        console.error('Failed to update task status:', updateError);
-      });
+      try {
+        const failedTask = await findMediaTaskById(taskId);
+        await updateMediaTaskById(taskId, {
+          status: 'failed',
+          errorMessage: error.message || 'Background processing failed',
+          progress: 0,
+          creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
+        });
+        console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+      } catch (updateError: any) {
+        console.error('[Failed to Update Task Status]', {
+          taskId,
+          updateError: updateError.message,
+        });
+      }
     });
 
     // Immediately return task ID

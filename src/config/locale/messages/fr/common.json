@@ -28,7 +28,9 @@
     "name_title": "Nom",
     "name_placeholder": "Entrez votre nom ici",
     "admin_title": "Système d'administration",
-    "credits_title": "Crédits : {credits}"
+    "credits_title": "Crédits : {credits}",
+    "email_already_exists": "Cet e-mail est déjà enregistré. Veuillez vous connecter ou utiliser un autre e-mail.",
+    "sign_up_failed": "L'inscription a échoué"
   },
   "payment": {
     "choose_payment_method": "Choisir le mode de paiement",
