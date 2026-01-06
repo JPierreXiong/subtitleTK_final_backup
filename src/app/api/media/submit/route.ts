@@ -160,19 +160,57 @@ async function processMediaTask(
     }
 
     // Update progress with metadata
-    await updateMediaTaskById(taskId, {
-      progress: 30,
-      platform: mediaData.platform,
-      title: mediaData.title,
-      author: mediaData.author,
-      likes: mediaData.likes,
-      views: mediaData.views,
-      shares: mediaData.shares,
-      duration: mediaData.duration,
-      publishedAt: mediaData.publishedAt,
-      thumbnailUrl: mediaData.thumbnailUrl,
-      sourceLang: mediaData.sourceLang || 'auto',
-    });
+    // ⚠️ 关键：使用 sanitizer 清理数据，防止数据库更新失败
+    const { sanitizeMediaTaskUpdate } = await import('@/shared/utils/media-data-sanitizer');
+    
+    try {
+      const sanitizedData = sanitizeMediaTaskUpdate({
+        progress: 30,
+        platform: mediaData.platform,
+        title: mediaData.title,
+        author: mediaData.author,
+        likes: mediaData.likes,
+        views: mediaData.views,
+        shares: mediaData.shares,
+        duration: mediaData.duration, // 可能是 "00:28" 格式，需要转换为秒数
+        publishedAt: mediaData.publishedAt,
+        thumbnailUrl: mediaData.thumbnailUrl,
+        sourceLang: mediaData.sourceLang || 'auto',
+      });
+
+      await updateMediaTaskById(taskId, sanitizedData);
+    } catch (updateError: any) {
+      // ⚠️ 关键：如果 metadata 更新失败，标记任务为 failed 并触发退款
+      console.error('[Metadata Update Failed]', {
+        taskId,
+        error: updateError.message,
+        stack: updateError.stack,
+        mediaData: {
+          duration: mediaData.duration,
+          thumbnailUrl: mediaData.thumbnailUrl?.substring(0, 100), // Log first 100 chars
+        },
+      });
+
+      // Get task to retrieve creditId for refund
+      try {
+        const failedTask = await findMediaTaskById(taskId);
+        await updateMediaTaskById(taskId, {
+          status: 'failed',
+          errorMessage: `Metadata update failed: ${updateError.message}`,
+          progress: 0,
+          creditId: failedTask?.creditId || null,
+        });
+        console.log(`[Task Updated] Task ${taskId} marked as failed due to metadata update error`);
+      } catch (markFailedError: any) {
+        console.error('[Failed to Mark Task as Failed]', {
+          taskId,
+          error: markFailedError.message,
+        });
+      }
+
+      // Re-throw to stop processing
+      throw updateError;
+    }
 
     // Step 3: Handle video upload if needed (TikTok + video output type)
     let videoUrlInternal: string | null = null;
