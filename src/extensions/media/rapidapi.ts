@@ -259,8 +259,13 @@ export class RapidAPIProvider {
       }
     }
 
-    // Normalize metadata
-    const metadata = this.normalizeMetadata(videoData, 'youtube');
+    // Normalize metadata (merge API metadata with normalized videoData metadata)
+    const normalizedMetadata = this.normalizeMetadata(videoData || {}, 'youtube');
+    // Merge API metadata with normalized metadata (API metadata takes priority)
+    metadata = {
+      ...normalizedMetadata,
+      ...metadata,
+    };
 
     // Extract video URL from API response
     // Common response formats:
