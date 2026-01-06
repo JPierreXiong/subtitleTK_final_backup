@@ -52,7 +52,7 @@ async function checkSessionStatus() {
 
     if (validSessions.length > 0) {
       console.log('有效的 Session:');
-      validSessions.slice(0, 5).forEach((s, index) => {
+      validSessions.slice(0, 5).forEach((s: any, index: number) => {
         const expiresAt = new Date(s.expiresAt);
         const createdAt = new Date(s.createdAt);
         console.log(`\n  ${index + 1}. Session ID: ${s.id.substring(0, 20)}...`);
@@ -82,7 +82,7 @@ async function checkSessionStatus() {
 
     if (recentSessions.length > 0) {
       console.log('最近的 Session:');
-      recentSessions.forEach((s, index) => {
+      recentSessions.forEach((s: any, index: number) => {
         const createdAt = new Date(s.createdAt);
         const expiresAt = new Date(s.expiresAt);
         console.log(`\n  ${index + 1}. 创建时间: ${createdAt.toLocaleString()}`);
@@ -116,7 +116,7 @@ async function checkSessionStatus() {
 
         if (userInfo.length > 0) {
           const u = userInfo[0];
-          const userSessions = validSessions.filter(s => s.userId === userId);
+          const userSessions = validSessions.filter((s: any) => s.userId === userId);
           console.log(`  用户: ${u.email} (${u.name})`);
           console.log(`    有效 Session 数: ${userSessions.length}`);
         }
