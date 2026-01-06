@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "title": "Extracteur de Sous-titres Vidéo",
+    "description": "Extrayez et traduisez les sous-titres des vidéos YouTube et TikTok en un clic"
+  },
+  "page": {
+    "title": "Extracteur de Sous-titres Vidéo",
+    "description": "Extrayez et traduisez les sous-titres des vidéos YouTube et TikTok en un clic"
+  },
+  "extractor": {
+    "title": "Extracteur de Médias",
+    "url_label": "URL de la Vidéo",
+    "url_placeholder": "Collez le lien YouTube ou TikTok ici...",
+    "source_lang_label": "Langue Source",
+    "source_lang_placeholder": "Détection automatique",
+    "target_lang_label": "Langue Cible",
+    "target_lang_placeholder": "Sélectionner la langue",
+    "output_type_label": "Type de Sortie",
+    "output_type_subtitle": "Sous-titre",
+    "output_type_video": "Vidéo",
+    "extract": "Extraire",
+    "extracting": "Extraction en cours...",
+    "translating": "Traduction en cours...",
+    "completed": "Terminé",
+    "failed": "Échec",
+    "loading": "Chargement...",
+    "sign_in_to_extract": "Connectez-vous pour extraire les sous-titres",
+    "credits_cost": "Coût : {credits} crédits",
+    "credits_remaining": "{credits} crédits restants",
+    "buy_credits": "Acheter des Crédits",
+    "extraction_progress": "Progression de l'Extraction",
+    "time_cost": "Cela peut prendre jusqu'à 3 minutes...",
+    "translation_time_cost": "La traduction peut prendre jusqu'à 1 minute...",
+    "download_srt": "Télécharger SRT",
+    "download_video": "Télécharger la Vidéo",
+    "download_native_srt": "Télécharger les Sous-titres Originaux",
+    "download_translated_srt": "Télécharger les Sous-titres Traduits",
+    "no_result": "Aucun Résultat",
+    "error_message": "Erreur : {message}",
+    "invalid_url": "URL invalide. Seuls YouTube et TikTok sont pris en charge.",
+    "active_task": "Vous avez déjà une tâche en cours. Veuillez attendre qu'elle se termine.",
+    "insufficient_credits": "Crédits insuffisants",
+    "languages": {
+      "en": "Anglais",
+      "zh-CN": "Chinois (Simplifié)",
+      "es": "Espagnol",
+      "fr": "Français",
+      "de": "Allemand",
+      "ja": "Japonais",
+      "ko": "Coréen",
+      "pt": "Portugais",
+      "ru": "Russe",
+      "it": "Italien",
+      "ar": "Arabe",
+      "hi": "Hindi"
+    },
+    "cost_info": "* Coût : 10-15 Crédits par demande (10 pour extraction, 15 pour téléchargement vidéo ou traduction)"
+  }
+}
+
+
+

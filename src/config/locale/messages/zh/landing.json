@@ -1,0 +1,508 @@
+{
+  "header": {
+    "id": "header",
+    "brand": {
+      "title": "Subtitle ToolKit",
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "媒体提取器",
+          "url": "/ai-media-extractor",
+          "icon": "Video"
+        },
+        {
+          "title": "价格",
+          "url": "/pricing",
+          "icon": "DollarSign"
+        }
+      ]
+    },
+    "buttons": [],
+    "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
+      "items": [
+        {
+          "title": "提取媒体",
+          "url": "/ai-media-extractor",
+          "icon": "Video"
+        },
+        {
+          "title": "账单",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
+        },
+        {
+          "title": "活动",
+          "url": "/activity",
+          "icon": "Activity"
+        }
+      ]
+    },
+    "show_sign": true,
+    "show_theme": true,
+    "show_locale": true
+  },
+  "hero": {
+    "id": "hero",
+    "title": "SubtitleTK: Extract the Essence. Translate the Message. Reach the World",
+    "highlight_text": "",
+    "description": "<strong>Supercharge your content reach by turning any YouTube or TikTok video into a global masterpiece with one-click AI subtitling.</strong>",
+    "announcement": {
+      "badge": "全新",
+      "title": "🎉 Subtitle TK",
+      "url": "/pricing"
+    },
+    "tip": "",
+    "buttons": [
+      {
+        "title": "立即开始",
+        "icon": "Zap",
+        "url": "/pricing",
+        "target": "_self",
+        "variant": "default"
+      }
+    ],
+    "show_avatars": false,
+    "avatars_tip": "",
+    "show_award": false,
+    "image": {
+      "src": "/imgs/features/admin.png",
+      "alt": "hero"
+    },
+    "image_invert": {
+      "src": "/imgs/features/admin-dark.png",
+      "alt": "hero"
+    }
+  },
+  "logos": {
+    "title": "Subtitle TK 使用以下技术栈构建",
+    "items": [
+      {
+        "title": "Next.js",
+        "image": {
+          "src": "/imgs/logos/nextjs.svg",
+          "alt": "Next.js"
+        }
+      },
+      {
+        "title": "React",
+        "image": {
+          "src": "/imgs/logos/react.svg",
+          "alt": "React"
+        }
+      },
+      {
+        "title": "TailwindCSS",
+        "image": {
+          "src": "/imgs/logos/tailwindcss.svg",
+          "alt": "TailwindCSS"
+        }
+      },
+      {
+        "title": "Shadcn/UI",
+        "image": {
+          "src": "/imgs/logos/shadcn.svg",
+          "alt": "Shadcn/UI"
+        }
+      },
+      {
+        "title": "Vercel",
+        "image": {
+          "src": "/imgs/logos/vercel.svg",
+          "alt": "Vercel"
+        }
+      }
+    ]
+  },
+  "introduce": {
+    "id": "introduce",
+    "title": "Subtitle TK 是什么？",
+    "label": "产品简介",
+    "description": "Subtitle TK 是专为 AI SaaS 创业项目打造的 NextJS 脚手架，包括丰富模板、组件及文档。",
+    "image": {
+      "src": "/imgs/features/landing-page.png",
+      "alt": "introduce"
+    },
+    "items": [
+      {
+        "title": "开箱即用的模板",
+        "description": "从数十款生产级 AI SaaS 模板中选择，快速开启你的项目。",
+        "icon": "RiNextjsFill",
+        "image": {
+          "src": "/imgs/features/1.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "基础设施搭建",
+        "description": "内置最佳实践，即刻拥有可扩展的基础设施。",
+        "icon": "RiDatabase2Line",
+        "image": {
+          "src": "/imgs/features/2.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "极速部署",
+        "description": "AI SaaS 产品快速上线，助力小时级交付。",
+        "icon": "RiCloudyFill",
+        "image": {
+          "src": "/imgs/features/3.png",
+          "alt": "introduce"
+        }
+      },
+      {
+        "title": "AI 集成",
+        "description": "通过内置的 AI SDK，轻松为你的项目集成 AI 能力。",
+        "icon": "RiRobot2Line",
+        "image": {
+          "src": "/imgs/features/4.png",
+          "alt": "introduce"
+        }
+      }
+    ]
+  },
+  "benefits": {
+    "id": "benefits",
+    "title": "为何选择 Subtitle TK",
+    "label": "产品优势",
+    "description": "你获得一切 AI 创业所需——从开箱即用的模板到专业技术支持。",
+    "items": [
+      {
+        "title": "全栈解决方案",
+        "description": "基于 Next.js，集成认证、支付、AI，一站式开箱即用。",
+        "icon": "RiNextjsFill",
+        "image": {
+          "src": "/imgs/features/user-billing.png",
+          "alt": "benefits"
+        }
+      },
+      {
+        "title": "丰富模板库",
+        "description": "多样的 AI SaaS 模板，点击即用，涵盖聊天、图像生成等多场景。",
+        "icon": "RiClapperboardAiLine",
+        "image": {
+          "src": "/imgs/features/admin-settings.png",
+          "alt": "benefits"
+        }
+      },
+      {
+        "title": "专属技术指导",
+        "description": "享受专属技术支持与开发者社区，为你的成功保驾护航。",
+        "icon": "RiCodeFill",
+        "image": {
+          "src": "/imgs/features/landing-page.png",
+          "alt": "benefits"
+        }
+      }
+    ]
+  },
+  "usage": {
+    "id": "usage",
+    "title": "三步使用 Subtitle TK 极速上线",
+    "description": "只需三步，快速开启你的 AI SaaS 创业之路：",
+    "image": {
+      "src": "/imgs/features/1.png",
+      "alt": "usage"
+    },
+    "image_position": "left",
+    "text_align": "center",
+    "items": [
+      {
+        "title": "获取 Subtitle TK",
+        "description": "一次性购买 Subtitle TK，查收邮件获取代码与文档。",
+        "image": {
+          "src": "/imgs/features/5.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "启动你的项目",
+        "description": "阅读说明文档，克隆 Subtitle TK 代码，开始开发你的 AI SaaS 项目。",
+        "image": {
+          "src": "/imgs/features/6.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "个性化定制",
+        "description": "根据需求修改模板内容和数据，配置专属 AI 能力。",
+        "image": {
+          "src": "/imgs/features/7.png",
+          "alt": "usage"
+        }
+      },
+      {
+        "title": "部署上线",
+        "description": "简单几步将你的项目推向生产环境，立刻为客户提供服务。",
+        "image": {
+          "src": "/imgs/features/8.png",
+          "alt": "usage"
+        }
+      }
+    ]
+  },
+  "features": {
+    "id": "features",
+    "title": "Subtitle TK 核心功能",
+    "description": "一切你需要的工具，助力 AI SaaS 项目高效上线。",
+    "items": [
+      {
+        "title": "Next.js 项目模板",
+        "description": "生产就绪、支持 SEO 与多语言的 Next.js 脚手架。",
+        "icon": "RiNextjsFill"
+      },
+      {
+        "title": "身份认证与支付",
+        "description": "集成谷歌 OAuth、一键登录，以及 Stripe 支付。",
+        "icon": "RiKey2Fill"
+      },
+      {
+        "title": "数据基础设施",
+        "description": "内置 Supabase，稳定可靠的数据存储。",
+        "icon": "RiDatabase2Line"
+      },
+      {
+        "title": "一键部署",
+        "description": "自动化部署到 Vercel 或 Cloudflare，极速上线。",
+        "icon": "RiCloudy2Fill"
+      },
+      {
+        "title": "商业分析",
+        "description": "集成 Google Analytics、Search Console，助力业务增长。",
+        "icon": "RiBarChart2Line"
+      },
+      {
+        "title": "AI 原生基础设施",
+        "description": "预置 AI 集成、积分系统和 API 售卖能力。",
+        "icon": "RiRobot2Line"
+      }
+    ]
+  },
+  "stats": {
+    "id": "stats",
+    "title": "用户喜爱 Subtitle TK",
+    "description": "因其易用且上线飞快。",
+    "items": [
+      {
+        "title": "999+",
+        "description": "位用户"
+      },
+      {
+        "title": "200+",
+        "description": "组件块"
+      },
+      {
+        "title": "50+",
+        "description": "专业模板"
+      }
+    ]
+  },
+  "testimonials": {
+    "id": "testimonials",
+    "title": "用户对 Subtitle TK 的评价",
+    "description": "听听内容创作者和企业如何用 Subtitle TK 改变他们的视频内容。",
+    "items": [
+      {
+        "name": "David Chen",
+        "role": "YouTube 内容创作者",
+        "quote": "Subtitle TK 改变了我的 YouTube 频道！现在我可以为全球观众提供 12 种语言的准确字幕。添加多语言字幕后，我的观看量增长了 300%。",
+        "image": {
+          "src": "/imgs/avatars/1.png",
+          "alt": "david"
+        }
+      },
+      {
+        "name": "Rachel Kim",
+        "role": "TikTok 网红",
+        "quote": "一键字幕提取和翻译每周为我节省数小时。我的 TikTok 视频现在可以连接全球观众，参与度大幅提升！",
+        "image": {
+          "src": "/imgs/avatars/2.png",
+          "alt": "rachel"
+        }
+      },
+      {
+        "name": "Marcus Thompson",
+        "role": "视频制作机构负责人",
+        "quote": "作为小型机构，Subtitle TK 以极低成本为我们提供了企业级的字幕能力。我们每月处理数百个视频，准确度完美。",
+        "image": {
+          "src": "/imgs/avatars/3.png",
+          "alt": "marcus"
+        }
+      },
+      {
+        "name": "Sofia Garcia",
+        "role": "在线教育平台经理",
+        "quote": "Subtitle TK 让我们的教育内容走向全球。来自 50 多个国家的学生现在可以通过准确的翻译学习我们的课程。改变游戏规则！",
+        "image": {
+          "src": "/imgs/avatars/4.png",
+          "alt": "sofia"
+        }
+      },
+      {
+        "name": "James Wilson",
+        "role": "营销总监",
+        "quote": "AI 驱动的翻译准确度极高。我们可以在几分钟内为不同市场本地化营销视频，而不是几天。投资回报率超高！",
+        "image": {
+          "src": "/imgs/avatars/5.png",
+          "alt": "james"
+        }
+      },
+      {
+        "name": "Anna Zhang",
+        "role": "内容策略师",
+        "quote": "Subtitle TK 的一键解决方案将我们的 YouTube 和 TikTok 内容变成了全球力量。我们的国际观众在短短 3 个月内增长了 500%！",
+        "image": {
+          "src": "/imgs/avatars/6.png",
+          "alt": "anna"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "id": "faq",
+    "title": "常见问题",
+    "description": "还有其他问题？请通过邮件联系我们。",
+    "tip": "没有找到想要的答案？请联系 <a href='mailto:support@subtitletk.app' class='text-primary font-medium hover:underline'>我们的客服团队</a>",
+    "items": [
+      {
+        "question": "支持哪些平台，处理流程是怎样的？",
+        "answer": "我们支持从 YouTube 和 TikTok 提取视频和字幕。处理过程分为两个阶段：首先，我们提取元数据和原始字幕；其次，您可以选择使用 Gemini 1.5 Flash AI 将内容翻译成目标语言。"
+      },
+      {
+        "question": "积分系统和\"故障安全\"退款政策如何运作？",
+        "answer": "任务根据使用情况消耗积分：提取 10 积分，视频下载 15 积分，AI 翻译 5 积分。如果任务因系统错误而失败，积分会立即自动退还到您的账户。"
+      },
+      {
+        "question": "订阅套餐和单次充值套餐有什么区别？",
+        "answer": "订阅套餐（专业版/基础版）：最适合高级用户，提供最低的每积分价格、高并发（最多 3 个任务）和无视频长度限制。积分每 30 天过期。单次充值（$4.9）：非常适合偶尔使用的用户。这些积分有效期 365 天。"
+      },
+      {
+        "question": "视频长度或并发任务有什么限制吗？",
+        "answer": "免费版和基础版用户限制为 10 分钟以下的视频，一次只能处理 1 个任务。专业版用户享受无限制的视频长度，可以同时运行最多 3 个任务以实现最大效率。"
+      },
+      {
+        "question": "如何每天获得免费积分？",
+        "answer": "您只需登录并使用我们的每日打卡功能，每天即可获得 5 个免费积分。这些积分有效期为 30 天，在 UTC 00:00 刷新，让您能够长期免费使用我们的高级服务。"
+      },
+      {
+        "question": "我的数据存储多长时间，是否安全？",
+        "answer": "您的隐私是我们的首要任务。提取的视频文件存储在加密的 Cloudflare R2 存储中，24 小时后永久删除。我们建议您在此时间窗口内下载文件（SRT、CSV 或视频）。"
+      }
+    ]
+  },
+  "cta": {
+    "id": "cta",
+    "title": "发布你的第一个 AI SaaS 项目",
+    "description": "从这里出发，用 Subtitle TK 极速交付。",
+    "buttons": [
+      {
+        "title": "获取 Subtitle TK",
+        "url": "https://www.subtitletk.app",
+        "target": "_blank",
+        "icon": "Zap"
+      },
+      {
+        "title": "阅读文档",
+        "url": "/docs",
+        "target": "_blank",
+        "variant": "outline",
+        "icon": "BookOpenText"
+      }
+    ]
+  },
+  "subscribe": {
+    "id": "subscribe",
+    "title": "订阅我们的邮件通知",
+    "description": "获取 Subtitle TK 最新资讯与产品动态。",
+    "submit": {
+      "input": {
+        "placeholder": "输入邮箱"
+      },
+      "button": {
+        "title": "订阅"
+      },
+      "action": "/api/subscribe"
+    }
+  },
+  "footer": {
+    "id": "footer",
+    "brand": {
+      "title": "Subtitle TK",
+      "description": "SubtitleTK is a high-performance digital toolkit designed to extract and translate subtitles from YouTube and TikTok videos. We believe in simple, transparent pricing.",
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "关于我们",
+          "children": [
+            {
+              "title": "关于我们",
+              "url": "/about",
+              "target": "_self"
+            },
+            {
+              "title": "联系我们",
+              "url": "/contact",
+              "target": "_self"
+            },
+            {
+              "title": "价格",
+              "url": "/pricing",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "合作伙伴",
+          "children": [
+            {
+              "title": "YouTube",
+              "url": "https://www.youtube.com",
+              "target": "_blank"
+            },
+            {
+              "title": "TikTok",
+              "url": "https://www.tiktok.com",
+              "target": "_blank"
+            }
+          ]
+        }
+      ]
+    },
+    "social": {
+      "items": [
+        {
+          "title": "邮箱",
+          "icon": "Mail",
+          "url": "mailto:support@subtitletk.app",
+          "target": "_self"
+        }
+      ]
+    },
+    "agreement": {
+      "items": [
+        {
+          "title": "隐私政策",
+          "url": "/privacy-policy"
+        },
+        {
+          "title": "服务条款",
+          "url": "/terms-of-service"
+        },
+        {
+          "title": "免责声明",
+          "url": "/disclaimer"
+        }
+      ]
+    },
+    "copyright": "Subtitle TK 是独立产品，与 Google (YouTube) 或 ByteDance (TikTok) 无关联。",
+    "show_theme": true,
+    "show_locale": true
+  }
+}

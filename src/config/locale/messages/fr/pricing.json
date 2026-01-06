@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "title": "Tarification",
+    "description": "Commencez avec un plan"
+  },
+  "pricing": {
+    "id": "pricing",
+    "sr_only_title": "Tarification Subtitle TK",
+    "title": "Tarification",
+    "description": "Obtenez toutes les fonctionnalités de Subtitle TK, déployez vos startups SaaS IA rapidement.",
+    "groups": [
+      {
+        "name": "one-time",
+        "title": "Paiement unique"
+      },
+      {
+        "name": "monthly",
+        "title": "Mensuel",
+        "is_featured": true,
+        "label": "économisez 15%"
+      }
+    ],
+    "items": [
+      {
+        "title": "Starter",
+        "description": "Commencez avec votre première startup SaaS.",
+        "features_title": "Inclus",
+        "features": [
+          "100 crédits, valables 1 mois",
+          "Modèle NextJS",
+          "Structure optimisée pour le SEO",
+          "Paiement avec Stripe",
+          "Stockage de données avec Supabase",
+          "Google Oauth et connexion en un clic",
+          "Support i18n"
+        ],
+        "interval": "one-time",
+        "amount": 9900,
+        "currency": "USD",
+        "price": "$99",
+        "original_price": "$199",
+        "unit": "",
+        "is_featured": false,
+        "tip": "Payez une fois. Créez des projets illimités !",
+        "button": {
+          "title": "Obtenir Subtitle TK",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "starter",
+        "product_name": "Subtitle TK Boilerplate Starter",
+        "credits": 100,
+        "valid_days": 30,
+        "group": "one-time"
+      },
+      {
+        "title": "Standard",
+        "description": "Déployez rapidement vos startups SaaS.",
+        "label": "Populaire",
+        "features_title": "Tout dans Starter, plus",
+        "features": [
+          "200 crédits, valables 3 mois",
+          "Déploiement avec Vercel ou Cloudflare",
+          "Génération de confidentialité et conditions",
+          "Intégration Google Analytics",
+          "Intégration Google Search Console",
+          "Communauté Discord",
+          "Support technique pour votre premier déploiement",
+          "Mises à jour à vie"
+        ],
+        "interval": "one-time",
+        "amount": 19900,
+        "currency": "USD",
+        "price": "$199",
+        "original_price": "$299",
+        "unit": "",
+        "is_featured": true,
+        "tip": "Payez une fois. Créez des projets illimités !",
+        "button": {
+          "title": "Obtenir Subtitle TK",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "standard",
+        "product_name": "Subtitle TK Boilerplate Standard",
+        "credits": 200,
+        "valid_days": 90,
+        "group": "one-time"
+      },
+      {
+        "title": "Premium",
+        "description": "Déployez n'importe quelle startup SaaS IA.",
+        "features_title": "Tout dans Standard, plus",
+        "features": [
+          "300 crédits, valables 1 an",
+          "Fonctions métier avec IA",
+          "Centre utilisateur",
+          "Système de crédits",
+          "Vente d'API pour votre SaaS",
+          "Système d'administration",
+          "Support technique prioritaire"
+        ],
+        "interval": "one-time",
+        "amount": 29900,
+        "currency": "USD",
+        "price": "$299",
+        "original_price": "$399",
+        "unit": "",
+        "is_featured": false,
+        "tip": "Payez une fois. Créez des projets illimités !",
+        "button": {
+          "title": "Obtenir Subtitle TK",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "premium",
+        "product_name": "Subtitle TK Boilerplate Premium",
+        "credits": 300,
+        "valid_days": 365,
+        "group": "one-time"
+      },
+      {
+        "title": "Gratuit",
+        "description": "Essai gratuit pour les liens YouTube ou TikTok.",
+        "features_title": "Inclus",
+        "features": [
+          "50 crédits, valables 7 jours",
+          "Extraction de sous-titres YouTube et TikTok (10 crédits par utilisation)",
+          "Téléchargement de vidéo (15 crédits par utilisation)",
+          "Extraction de sous-titres + traduction IA (15 crédits par utilisation)",
+          "Limite de traduction : 1 000 mots",
+          "Support pour 12 langues",
+          "Fichiers conservés jusqu'à 24 heures"
+        ],
+        "interval": "month",
+        "amount": 0,
+        "currency": "USD",
+        "price": "Gratuit",
+        "original_price": "",
+        "unit": "",
+        "is_featured": false,
+        "tip": "Parfait pour essayer notre service !",
+        "button": {
+          "title": "Commencer gratuitement",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "starter-monthly",
+        "product_name": "Plan Gratuit",
+        "credits": 50,
+        "valid_days": 7,
+        "group": "monthly",
+        "plan_name": "Gratuit"
+      },
+      {
+        "title": "Professionnel",
+        "description": "Pour les créateurs de contenu professionnels et les entreprises.",
+        "label": "Populaire",
+        "features_title": "Inclus",
+        "features": [
+          "10000 crédits, valables 30 jours",
+          "Extraction de sous-titres YouTube et TikTok (10 crédits par utilisation)",
+          "Téléchargement de vidéo (15 crédits par utilisation)",
+          "Extraction de sous-titres + traduction IA (15 crédits par utilisation)",
+          "Limite de traduction : 20 000 mots",
+          "Support pour 12 langues",
+          "1 Go de stockage cloud",
+          "Fichiers conservés à long terme, supprimés 3 jours après expiration"
+        ],
+        "interval": "month",
+        "amount": 1990,
+        "currency": "USD",
+        "price": "$19.9",
+        "original_price": "",
+        "unit": "/ mois",
+        "is_featured": true,
+        "tip": "Parfait pour un usage professionnel !",
+        "button": {
+          "title": "Obtenir Professionnel",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "standard-monthly",
+        "product_name": "Plan Professionnel",
+        "credits": 10000,
+        "valid_days": 30,
+        "group": "monthly",
+        "plan_name": "Professionnel"
+      },
+      {
+        "title": "Ultima",
+        "description": "Pour les utilisateurs avancés et les opérations à grande échelle.",
+        "features_title": "Inclus",
+        "features": [
+          "50000 crédits, valables 30 jours",
+          "2500 liens YouTube et 2500 liens TikTok",
+          "Extraction de sous-titres YouTube et TikTok (10 crédits par utilisation)",
+          "5000 téléchargements de fichiers ou vidéos (15 crédits par utilisation)",
+          "Extraction de sous-titres + traduction IA (15 crédits par utilisation)",
+          "Limite de traduction : 300 000 mots",
+          "Support pour 12 langues",
+          "100 Go de stockage cloud",
+          "Fichiers conservés à long terme, supprimés 7 jours après expiration"
+        ],
+        "interval": "month",
+        "amount": 5990,
+        "currency": "USD",
+        "price": "$59.9",
+        "original_price": "",
+        "unit": "/ mois",
+        "is_featured": false,
+        "tip": "Puissance maximale pour les créateurs sérieux !",
+        "button": {
+          "title": "Obtenir Ultima",
+          "url": "/#pricing",
+          "icon": "RiFlashlightFill"
+        },
+        "product_id": "premium-monthly",
+        "product_name": "Plan Ultima",
+        "credits": 50000,
+        "valid_days": 30,
+        "group": "monthly",
+        "plan_name": "Ultima"
+      }
+    ]
+  },
+  "page": {
+    "current_plan": "Plan actuel",
+    "processing": "Traitement en cours"
+  }
+}

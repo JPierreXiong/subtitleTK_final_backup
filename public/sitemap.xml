@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage and Language Versions -->
+  <url>
+    <loc>https://subtitletk.app/</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/en</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/zh</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/fr</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- About Us Pages (Multi-language) -->
+  <url>
+    <loc>https://subtitletk.app/about</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/zh/about</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/fr/about</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Contact Us Pages (Multi-language) -->
+  <url>
+    <loc>https://subtitletk.app/contact</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/zh/contact</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/fr/contact</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Pricing Pages (Multi-language) -->
+  <url>
+    <loc>https://subtitletk.app/pricing</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/zh/pricing</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/fr/pricing</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- AI Media Extractor Pages (Multi-language) -->
+  <url>
+    <loc>https://subtitletk.app/ai-media-extractor</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/zh/ai-media-extractor</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/fr/ai-media-extractor</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://subtitletk.app/privacy-policy</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/terms-of-service</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://subtitletk.app/disclaimer</loc>
+    <lastmod>2025-01-04T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

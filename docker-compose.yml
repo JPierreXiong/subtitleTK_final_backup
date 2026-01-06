@@ -1,0 +1,53 @@
+# ============================================
+# Docker Compose 配置 - 本地 PostgreSQL 数据库
+# ============================================
+# 用途：在本地运行 PostgreSQL 数据库，用于开发和测试
+# 使用方法：
+#   启动: docker-compose up -d
+#   停止: docker-compose down
+#   查看日志: docker-compose logs -f db
+#   删除数据: docker-compose down -v
+# ============================================
+
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: shipany-local-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password_here
+      POSTGRES_DB: shipany
+    ports:
+      - "5432:5432"
+    volumes:
+      # 数据持久化（数据保存在 ./postgres_data 目录）
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ============================================
+# 使用说明
+# ============================================
+# 1. 修改 POSTGRES_PASSWORD 为你的密码（建议使用强密码）
+# 2. 启动数据库: docker-compose up -d
+# 3. 等待数据库就绪（约10-30秒）
+# 4. 更新 .env.local 中的 DATABASE_URL:
+#    DATABASE_URL=postgresql://postgres:your_password_here@localhost:5432/shipany
+# 5. 初始化数据库: pnpm db:push
+# 6. 测试连接: pnpm db:test
+# ============================================
+# 
+# 常用命令：
+#   docker-compose up -d          # 启动数据库
+#   docker-compose down            # 停止数据库
+#   docker-compose logs -f db      # 查看日志
+#   docker-compose down -v         # 停止并删除数据
+#   docker-compose ps              # 查看状态
+# ============================================
+
