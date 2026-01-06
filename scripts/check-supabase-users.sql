@@ -79,3 +79,4 @@ WHERE table_schema = 'public'
   AND table_name IN ('user', 'session', 'account', 'verification')
 ORDER BY table_name, grantee;
 
+

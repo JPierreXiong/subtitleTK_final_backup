@@ -122,3 +122,4 @@ echo "  1. 验证迁移结果: pnpm db:verify"
 echo "  2. 切换回 Pooler 连接（在 .env.local 中）"
 echo "  3. 测试应用功能"
 
+

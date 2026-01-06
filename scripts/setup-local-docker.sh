@@ -86,3 +86,4 @@ echo "  docker-compose logs -f db    # 查看日志"
 echo "  docker-compose down           # 停止数据库"
 echo "  docker-compose down -v       # 停止并删除数据"
 
+

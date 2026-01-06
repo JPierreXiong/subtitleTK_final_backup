@@ -107,3 +107,4 @@ if (!type || (type !== 'pooler' && type !== 'direct')) {
 
 switchConnection(type);
 
+
