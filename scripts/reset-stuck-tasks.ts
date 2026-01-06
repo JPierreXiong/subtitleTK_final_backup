@@ -43,7 +43,7 @@ async function resetStuckTasks() {
 
     // 显示将要重置的任务
     console.log('将要重置的任务:');
-    stuckTasks.forEach((task, index) => {
+    stuckTasks.forEach((task: any, index: number) => {
       const createdAt = new Date(task.createdAt);
       const now = new Date();
       const minutesAgo = Math.floor((now.getTime() - createdAt.getTime()) / 1000 / 60);
