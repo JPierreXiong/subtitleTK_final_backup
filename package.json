@@ -43,8 +43,6 @@
     "update:vercel-env": "npx tsx scripts/update-vercel-env.ts",
     "check:stuck-tasks": "npx tsx scripts/check-stuck-tasks.ts",
     "reset:stuck-tasks": "npx tsx scripts/reset-stuck-tasks.ts",
-    "check:stuck-tasks": "npx tsx scripts/check-stuck-tasks.ts",
-    "reset:stuck-tasks": "npx tsx scripts/reset-stuck-tasks.ts",
     "check:session": "npx tsx scripts/check-session-status.ts",
     "debug:rapidapi": "npx tsx scripts/test-rapidapi-connection.ts",
     "debug:rapidapi-config": "npx tsx scripts/check-rapidapi-config.ts",

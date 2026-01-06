@@ -45,7 +45,7 @@ async function checkSessionStatus() {
     console.log('📋 步骤 2: 检查有效的 Session');
     console.log('----------------------------------------');
     const now = new Date();
-    const validSessions = allSessions.filter(s => new Date(s.expiresAt) > now);
+    const validSessions = allSessions.filter((s: any) => new Date(s.expiresAt) > now);
     console.log(`有效 Session 数: ${validSessions.length}`);
     console.log(`过期 Session 数: ${allSessions.length - validSessions.length}`);
     console.log('');
