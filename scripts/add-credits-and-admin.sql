@@ -185,24 +185,31 @@ BEGIN
   
 END $$;
 
--- 第六步：验证结果
+-- 第六步：验证结果 - 显示充值后的积分余额
 SELECT 
   u.email,
   u.id as user_id,
-  COALESCE(SUM(c.remaining_credits), 0) as total_credits,
+  u.name,
+  COALESCE(SUM(
+    CASE 
+      WHEN c.transaction_type = 'grant' 
+        AND c.status = 'active' 
+        AND (c.expires_at IS NULL OR c.expires_at > NOW())
+        AND c.remaining_credits > 0
+      THEN c.remaining_credits
+      ELSE 0
+    END
+  ), 0) as total_credits,
   CASE 
     WHEN ur.id IS NOT NULL THEN 'Yes'
     ELSE 'No'
   END as is_admin
 FROM "user" u
-LEFT JOIN "credit" c ON c.user_id = u.id 
-  AND c.transaction_type = 'grant' 
-  AND c.status = 'active'
-  AND (c.expires_at IS NULL OR c.expires_at > NOW())
+LEFT JOIN "credit" c ON c.user_id = u.id
 LEFT JOIN "user_role" ur ON ur.user_id = u.id
 LEFT JOIN "role" r ON r.id = ur.role_id AND r.name = 'admin' AND r.status = 'active'
 WHERE u.email IN ('xiongjp_fr@163.com', 'xiongjp_fr@hotmail.com')
-GROUP BY u.email, u.id, ur.id
+GROUP BY u.email, u.id, u.name, ur.id
 ORDER BY u.email;
 
 -- ============================================
