@@ -63,7 +63,8 @@ export interface NormalizedMediaData {
  */
 export class RapidAPIProvider {
   private configs: RapidAPIConfigs;
-  private readonly DEFAULT_TIMEOUT = 180000; // 3 minutes
+  // Vercel Free 版限制：10秒，设置为 8 秒留出缓冲
+  private readonly DEFAULT_TIMEOUT = 8000; // 8 seconds (for Vercel Free tier)
 
   constructor(configs: RapidAPIConfigs) {
     this.configs = configs;
@@ -403,7 +404,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的主 API Host（从环境变量读取）
     // 免费API：snap-video3.p.rapidapi.com（免费配额多）
@@ -549,7 +550,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的备 API Host（从环境变量读取）
     // 付费API：cloud-api-hub-youtube-downloader.p.rapidapi.com（收费便宜）
@@ -919,7 +920,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     const MIN_TRANSCRIPT_LENGTH = 300; // Minimum transcript length (characters)
     
     // 使用配置中的主 API Host（从环境变量读取）
@@ -1046,7 +1047,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的备 API Host（从环境变量读取）
     const host = this.configs.youtubeTranscript?.backupHost || 
@@ -1196,7 +1197,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     const MIN_TRANSCRIPT_LENGTH = 100; // Minimum transcript length (characters) - TikTok videos are usually shorter
     
     // 使用配置中的主 API Host（从环境变量读取）
@@ -1334,7 +1335,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的备 API Host（从环境变量读取）
     // 付费API：tiktok-transcript.p.rapidapi.com（收费便宜）
@@ -1674,7 +1675,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 15000; // 15 seconds timeout
+    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的主 API Host（从环境变量读取）
     const host = this.configs.tiktokVideo?.primaryHost || 
@@ -1820,7 +1821,7 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
+    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
     // 使用配置中的备 API Host（从环境变量读取）
     const host = this.configs.tiktokVideo?.backupHost || 

@@ -11,14 +11,28 @@ export async function GET(request: Request) {
       return respErr('Task ID is required');
     }
 
-    // Get current user
-    const user = await getUserInfo();
+    // 1. 增加超时检查，防止 getUserInfo 挂死整个请求
+    const AUTH_TIMEOUT = 5000; // 5 seconds
+    const user = await Promise.race([
+      getUserInfo(),
+      new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth Timeout: getUserInfo took longer than 5 seconds')), AUTH_TIMEOUT)
+      ),
+    ]) as any;
+
     if (!user) {
       return respErr('no auth, please sign in');
     }
 
-    // Find task
-    const task = await findMediaTaskById(taskId);
+    // 2. 增加超时检查，防止 findMediaTaskById 挂死
+    const DB_QUERY_TIMEOUT = 5000; // 5 seconds
+    const task = await Promise.race([
+      findMediaTaskById(taskId),
+      new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Database Timeout: findMediaTaskById took longer than 5 seconds')), DB_QUERY_TIMEOUT)
+      ),
+    ]) as any;
+
     if (!task) {
       return respErr('Task not found');
     }
@@ -56,8 +70,14 @@ export async function GET(request: Request) {
       updatedAt: task.updatedAt,
     });
   } catch (e: any) {
-    console.log('media status query failed', e);
-    return respErr(e.message);
+    // 关键：在这里打印具体的堆栈，以便在 Vercel Logs 中看到是哪一行崩了
+    console.error('[API_STATUS_ERROR]', {
+      message: e.message,
+      name: e.name,
+      stack: e.stack,
+      timestamp: new Date().toISOString(),
+    });
+    return respErr(`Internal Server Error: ${e.message}`);
   }
 }
 
