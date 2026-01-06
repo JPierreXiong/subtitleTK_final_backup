@@ -31,7 +31,7 @@ async function checkStuckTasks() {
 
     if (processingTasks.length > 0) {
       console.log('卡住的任务列表:');
-      processingTasks.forEach((task, index) => {
+      processingTasks.forEach((task: any, index: number) => {
         const createdAt = new Date(task.createdAt);
         const now = new Date();
         const minutesAgo = Math.floor((now.getTime() - createdAt.getTime()) / 1000 / 60);
@@ -74,7 +74,7 @@ async function checkStuckTasks() {
 
     if (stuckTasks.length > 0) {
       console.log('⚠️  建议手动重置以下任务:');
-      stuckTasks.forEach((task, index) => {
+      stuckTasks.forEach((task: any, index: number) => {
         const createdAt = new Date(task.createdAt);
         const now = new Date();
         const minutesAgo = Math.floor((now.getTime() - createdAt.getTime()) / 1000 / 60);
@@ -99,7 +99,7 @@ async function checkStuckTasks() {
       .limit(10);
 
     console.log(`最近 10 个任务:`);
-    recentTasks.forEach((task, index) => {
+    recentTasks.forEach((task: any, index: number) => {
       const createdAt = new Date(task.createdAt);
       const now = new Date();
       const minutesAgo = Math.floor((now.getTime() - createdAt.getTime()) / 1000 / 60);
@@ -127,7 +127,7 @@ async function checkStuckTasks() {
       .groupBy(mediaTasks.status);
 
     console.log('各状态的任务数量:');
-    statusCounts.forEach(({ status, count }) => {
+    statusCounts.forEach(({ status, count }: { status: any; count: any }) => {
       console.log(`  ${status}: ${count}`);
     });
     console.log('');
@@ -148,7 +148,7 @@ async function checkStuckTasks() {
         console.log('⚠️  Session 表为空！这可能导致认证问题，任务可能因此卡住。');
         console.log('   建议运行 scripts/fix-supabase-rls.sql 修复 RLS 设置');
       } else {
-        sessions.forEach((s, index) => {
+        sessions.forEach((s: any, index: number) => {
           const expiresAt = new Date(s.expiresAt);
           const now = new Date();
           const isExpired = expiresAt < now;
