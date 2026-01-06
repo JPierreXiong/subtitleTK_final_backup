@@ -38,7 +38,7 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
       translate: 5,
     },
     maxVideoDuration: null, // No limit for free plan
-    concurrentLimit: 1,
+    concurrentLimit: 2, // Allow 2 concurrent tasks for better user experience
     exportFormats: ['SRT', 'CSV'],
     storageHours: 24,
     translationCharLimit: 1000,
@@ -57,7 +57,7 @@ export const PLAN_CONFIG: Record<PlanType, PlanConfig> = {
       translate: 5,
     },
     maxVideoDuration: 600, // 10 minutes
-    concurrentLimit: 1,
+    concurrentLimit: 2, // Allow 2 concurrent tasks for better user experience
     exportFormats: ['SRT', 'CSV'],
     storageHours: 24,
     translationCharLimit: null, // No limit

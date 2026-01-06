@@ -309,6 +309,19 @@ export async function POST(request: NextRequest) {
     // Subtitle extraction only: 10 credits
     let requiredCredits = outputType === 'video' ? 15 : 10;
 
+    // 🛡 Watchdog: Mark timeout tasks BEFORE checking concurrent limit
+    // This ensures failed/timeout tasks don't block new submissions
+    try {
+      const { markTimeoutTasks } = await import('@/shared/models/media_task_watchdog');
+      const timeoutCount = await markTimeoutTasks();
+      if (timeoutCount > 0) {
+        console.log(`[Watchdog] Marked ${timeoutCount} timeout tasks before submission`);
+      }
+    } catch (watchdogError: any) {
+      // Don't fail the request if watchdog fails, just log it
+      console.error('[Watchdog Error]', watchdogError.message);
+    }
+
     // Check plan limits (including free trial availability)
     const planLimitsCheck = await checkAllPlanLimits({
       userId: currentUser.id,

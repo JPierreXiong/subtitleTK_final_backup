@@ -275,7 +275,7 @@ export const subscription = pgTable(
     creditsValidDays: integer('credits_valid_days'), // subscription credits valid days
     // Plan limits
     maxVideoDuration: integer('max_video_duration'), // Video duration limit in seconds (null = unlimited)
-    concurrentLimit: integer('concurrent_limit').default(1), // Concurrent task limit (null = unlimited)
+    concurrentLimit: integer('concurrent_limit').default(2), // Concurrent task limit (null = unlimited, default: 2)
     exportFormats: text('export_formats'), // JSON array: ["SRT","CSV","VTT","TXT"]
     storageHours: integer('storage_hours').default(24), // Storage duration in hours
     translationCharLimit: integer('translation_char_limit'), // Translation character limit (null = unlimited)

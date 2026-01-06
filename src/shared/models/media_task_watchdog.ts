@@ -14,7 +14,7 @@
 
 import { db } from '@/core/db';
 import { mediaTasks } from '@/config/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, lt } from 'drizzle-orm';
 import { updateMediaTaskById } from './media_task';
 
 /**
@@ -56,7 +56,7 @@ export async function markTimeoutTasks(): Promise<number> {
         eq(mediaTasks.status, 'processing'),
         // Task updated_at is older than MAX_TASK_TIME_SECONDS
         // This means task has been stuck in processing for too long
-        sql`${mediaTasks.updatedAt} < ${timeoutThreshold.toISOString()}`
+        lt(mediaTasks.updatedAt, timeoutThreshold)
       )
     );
 
