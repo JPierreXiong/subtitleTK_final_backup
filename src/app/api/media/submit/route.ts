@@ -82,6 +82,9 @@ async function processMediaTask(
         let expiresAt: Date | null = null;
 
         if (cached.platform === 'tiktok') {
+          // 💓 Heartbeat: Video upload can take time, send heartbeat
+          await sendTaskHeartbeat(taskId, 50);
+          
           // TikTok: Try to upload video to storage (R2 or Vercel Blob)
           const storageIdentifier = await uploadVideoToStorage(cached.downloadUrl);
 
@@ -130,6 +133,11 @@ async function processMediaTask(
     // ❌ Cache miss: Normal API call flow
     console.log(`[Cache Miss] Fetching from RapidAPI for ${url}`);
     
+    // 💓 Heartbeat: Send heartbeat before long-running API call
+    // This prevents watchdog from killing tasks that are actually running
+    const { sendTaskHeartbeat } = await import('@/shared/utils/task-heartbeat');
+    await sendTaskHeartbeat(taskId, 20); // Update progress to 20, heartbeat updated_at
+
     // Add overall timeout protection (8 seconds max for Vercel Free tier)
     // Note: Individual API calls already have 8s timeout, this is a safety net
     const API_CALL_TIMEOUT = 8000; // 8 seconds (for Vercel Free tier)
@@ -212,6 +220,10 @@ async function processMediaTask(
       throw updateError;
     }
 
+    // 💓 Heartbeat: Send heartbeat after metadata update
+    // Long-running video upload operations need heartbeat
+    await sendTaskHeartbeat(taskId, 40);
+
     // Step 3: Handle video upload if needed (TikTok + video output type)
     let videoUrlInternal: string | null = null;
     let expiresAt: Date | null = null;
@@ -220,11 +232,11 @@ async function processMediaTask(
       outputType === 'video' &&
       mediaData.videoUrl
     ) {
-      await updateMediaTaskById(taskId, {
-        progress: 40,
-      });
 
       if (mediaData.platform === 'tiktok' && mediaData.isTikTokVideo) {
+        // 💓 Heartbeat: Video upload can take time, send heartbeat
+        await sendTaskHeartbeat(taskId, 50);
+        
         // TikTok: Try to upload video to storage (R2 or Vercel Blob)
         const storageIdentifier = await uploadVideoToStorage(mediaData.videoUrl);
 
