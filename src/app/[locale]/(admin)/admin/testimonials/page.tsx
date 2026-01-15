@@ -37,59 +37,37 @@ export default async function TestimonialsPage({
   const page = pageNum || 1;
   const limit = pageSize || 30;
 
-  // Note: Translations would need to be added to locale files
-  // For now using hardcoded English labels
-  const t = {
-    'list.title': 'Testimonials',
-    'list.crumbs.admin': 'Admin',
-    'list.crumbs.testimonials': 'Testimonials',
-    'list.buttons.add': 'Add Testimonial',
-    'list.buttons.edit': 'Edit',
-    'list.buttons.approve': 'Approve',
-    'list.buttons.reject': 'Reject',
-    'list.buttons.delete': 'Delete',
-    'list.tabs.all': 'All',
-    'list.tabs.pending': 'Pending',
-    'list.tabs.approved': 'Approved',
-    'list.tabs.rejected': 'Rejected',
-    'fields.name': 'Name',
-    'fields.role': 'Role',
-    'fields.quote': 'Quote',
-    'fields.language': 'Language',
-    'fields.status': 'Status',
-    'fields.rating': 'Rating',
-    'fields.created_at': 'Created At',
-    'fields.actions': 'Actions',
-  };
+  // Get translations
+  const t = await getTranslations('admin.testimonials');
 
   const crumbs: Crumb[] = [
-    { title: t['list.crumbs.admin'], url: '/admin' },
-    { title: t['list.crumbs.testimonials'], is_active: true },
+    { title: t('list.crumbs.admin'), url: '/admin' },
+    { title: t('list.crumbs.testimonials'), is_active: true },
   ];
 
   // Status tabs
   const tabs: Tab[] = [
     {
       name: 'all',
-      title: t['list.tabs.all'],
+      title: t('list.tabs.all'),
       url: '/admin/testimonials',
       is_active: !status || status === 'all',
     },
     {
       name: 'pending',
-      title: t['list.tabs.pending'],
+      title: t('list.tabs.pending'),
       url: '/admin/testimonials?status=pending',
       is_active: status === 'pending',
     },
     {
       name: 'approved',
-      title: t['list.tabs.approved'],
+      title: t('list.tabs.approved'),
       url: '/admin/testimonials?status=approved',
       is_active: status === 'approved',
     },
     {
       name: 'rejected',
-      title: t['list.tabs.rejected'],
+      title: t('list.tabs.rejected'),
       url: '/admin/testimonials?status=rejected',
       is_active: status === 'rejected',
     },
@@ -115,20 +93,20 @@ export default async function TestimonialsPage({
 
   const table: Table = {
     columns: [
-      { name: 'name', title: t['fields.name'] },
-      { name: 'role', title: t['fields.role'] },
+      { name: 'name', title: t('fields.name') },
+      { name: 'role', title: t('fields.role') },
       {
         name: 'quote',
-        title: t['fields.quote'],
+        title: t('fields.quote'),
         callback: (item: Testimonial) => {
           const quote = item.quote || '';
           return quote.length > 100 ? `${quote.substring(0, 100)}...` : quote;
         },
       },
-      { name: 'language', title: t['fields.language'] },
+      { name: 'language', title: t('fields.language') },
       {
         name: 'status',
-        title: t['fields.status'],
+        title: t('fields.status'),
         type: 'label',
         callback: (item: Testimonial) => {
           const statusColors: Record<string, string> = {
@@ -144,15 +122,15 @@ export default async function TestimonialsPage({
       },
       {
         name: 'rating',
-        title: t['fields.rating'],
+        title: t('fields.rating'),
         callback: (item: Testimonial) => {
           return item.rating ? `${item.rating}/5` : '-';
         },
       },
-      { name: 'createdAt', title: t['fields.created_at'], type: 'time' },
+      { name: 'createdAt', title: t('fields.created_at'), type: 'time' },
       {
         name: 'actions',
-        title: t['fields.actions'],
+        title: t('fields.actions'),
         type: 'dropdown',
         callback: (item: Testimonial) => {
           const actions = [];
@@ -160,7 +138,7 @@ export default async function TestimonialsPage({
           // Edit action
           actions.push({
             name: 'edit',
-            title: t['list.buttons.edit'],
+            title: t('list.buttons.edit'),
             icon: 'RiEditLine',
             url: `/admin/testimonials/${item.id}/edit`,
           });
@@ -169,7 +147,7 @@ export default async function TestimonialsPage({
           if (item.status === TestimonialStatus.PENDING) {
             actions.push({
               name: 'approve',
-              title: t['list.buttons.approve'],
+              title: t('list.buttons.approve'),
               icon: 'RiCheckLine',
               url: `/admin/testimonials/${item.id}/approve`,
               method: 'POST',
@@ -183,7 +161,7 @@ export default async function TestimonialsPage({
           ) {
             actions.push({
               name: 'reject',
-              title: t['list.buttons.reject'],
+              title: t('list.buttons.reject'),
               icon: 'RiCloseLine',
               url: `/admin/testimonials/${item.id}/reject`,
               method: 'POST',
@@ -193,7 +171,7 @@ export default async function TestimonialsPage({
           // Delete action
           actions.push({
             name: 'delete',
-            title: t['list.buttons.delete'],
+            title: t('list.buttons.delete'),
             icon: 'RiDeleteBinLine',
             url: `/admin/testimonials/${item.id}/delete`,
             variant: 'destructive',
@@ -214,7 +192,7 @@ export default async function TestimonialsPage({
   const actions: Button[] = [
     {
       id: 'add',
-      title: t['list.buttons.add'],
+      title: t('list.buttons.add'),
       icon: 'RiAddLine',
       url: '/admin/testimonials/add',
     },
@@ -224,7 +202,7 @@ export default async function TestimonialsPage({
     <>
       <Header crumbs={crumbs} />
       <Main>
-        <MainHeader title={t['list.title']} actions={actions} tabs={tabs} />
+        <MainHeader title={t('list.title')} actions={actions} tabs={tabs} />
         <TableCard table={table} />
       </Main>
     </>

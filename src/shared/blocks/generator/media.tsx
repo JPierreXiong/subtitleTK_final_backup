@@ -20,6 +20,8 @@ import {
   X,
   Zap,
   Send,
+  Lightbulb,
+  ChevronDown,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -108,8 +110,10 @@ function AIRewriteCenter({
   const [hasCopied, setHasCopied] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [userRequirement, setUserRequirement] = useState<string>('');
+  const [showExamples, setShowExamples] = useState(false);
+  const [smartHint, setSmartHint] = useState<string>('');
   
-  // Quick requirement tags - using translations
+  // Quick requirement tags - using translations (expanded list)
   const quickTags = [
     { key: 'more_humorous', tag: t('custom_requirement.quick_tags.more_humorous') },
     { key: 'shorter', tag: t('custom_requirement.quick_tags.shorter') },
@@ -117,7 +121,77 @@ function AIRewriteCenter({
     { key: 'more_emojis', tag: t('custom_requirement.quick_tags.more_emojis') },
     { key: 'question_style', tag: t('custom_requirement.quick_tags.question_style') },
     { key: 'stronger_cta', tag: t('custom_requirement.quick_tags.stronger_cta') },
+    { key: 'guide_follow', tag: t('custom_requirement.quick_tags.guide_follow') },
+    { key: 'age_20s', tag: t('custom_requirement.quick_tags.age_20s') },
+    { key: 'age_30s', tag: t('custom_requirement.quick_tags.age_30s') },
+    { key: 'standup_style', tag: t('custom_requirement.quick_tags.standup_style') },
+    { key: 'add_sarcasm', tag: t('custom_requirement.quick_tags.add_sarcasm') },
+    { key: 'more_emotional', tag: t('custom_requirement.quick_tags.more_emotional') },
+    { key: 'add_numbers', tag: t('custom_requirement.quick_tags.add_numbers') },
+    { key: 'add_hashtags', tag: t('custom_requirement.quick_tags.add_hashtags') },
   ];
+  
+  // Example scenarios
+  const exampleScenarios = [
+    {
+      key: 'guide_follow',
+      title: t('custom_requirement.examples.scenarios.guide_follow.title'),
+      example: t('custom_requirement.examples.scenarios.guide_follow.example'),
+      icon: t('custom_requirement.examples.scenarios.guide_follow.icon'),
+    },
+    {
+      key: 'age_target',
+      title: t('custom_requirement.examples.scenarios.age_target.title'),
+      example: t('custom_requirement.examples.scenarios.age_target.example'),
+      icon: t('custom_requirement.examples.scenarios.age_target.icon'),
+    },
+    {
+      key: 'style_convert',
+      title: t('custom_requirement.examples.scenarios.style_convert.title'),
+      example: t('custom_requirement.examples.scenarios.style_convert.example'),
+      icon: t('custom_requirement.examples.scenarios.style_convert.icon'),
+    },
+    {
+      key: 'language_optimize',
+      title: t('custom_requirement.examples.scenarios.language_optimize.title'),
+      example: t('custom_requirement.examples.scenarios.language_optimize.example'),
+      icon: t('custom_requirement.examples.scenarios.language_optimize.icon'),
+    },
+    {
+      key: 'ending_optimize',
+      title: t('custom_requirement.examples.scenarios.ending_optimize.title'),
+      example: t('custom_requirement.examples.scenarios.ending_optimize.example'),
+      icon: t('custom_requirement.examples.scenarios.ending_optimize.icon'),
+    },
+    {
+      key: 'add_humor',
+      title: t('custom_requirement.examples.scenarios.add_humor.title'),
+      example: t('custom_requirement.examples.scenarios.add_humor.example'),
+      icon: t('custom_requirement.examples.scenarios.add_humor.icon'),
+    },
+  ];
+  
+  // Smart hint detection
+  useEffect(() => {
+    const requirement = userRequirement.toLowerCase();
+    let hint = '';
+    
+    if (requirement.includes('结尾') || requirement.includes('结束') || requirement.includes('最后') || requirement.includes('ending') || requirement.includes('fin')) {
+      hint = t('custom_requirement.smart_hints.ending');
+    } else if (requirement.includes('风格') || requirement.includes('方式') || requirement.includes('style') || requirement.includes('type')) {
+      hint = t('custom_requirement.smart_hints.style');
+    } else if (requirement.includes('年龄') || requirement.includes('岁') || requirement.includes('age') || requirement.includes('target')) {
+      hint = t('custom_requirement.smart_hints.age');
+    } else if (requirement.includes('语言') || requirement.includes('翻译') || requirement.includes('language') || requirement.includes('translate')) {
+      hint = t('custom_requirement.smart_hints.language');
+    } else if (requirement.includes('幽默') || requirement.includes('搞笑') || requirement.includes('humor') || requirement.includes('funny')) {
+      hint = t('custom_requirement.smart_hints.humor');
+    } else if (requirement.includes('长度') || requirement.includes('篇幅') || requirement.includes('length') || requirement.includes('short')) {
+      hint = t('custom_requirement.smart_hints.length');
+    }
+    
+    setSmartHint(hint);
+  }, [userRequirement, t]);
   
   // Character limit (500 chars)
   const MAX_REQUIREMENT_LENGTH = 500;
@@ -139,7 +213,12 @@ function AIRewriteCenter({
 
   const handleRewrite = async () => {
     reset();
-    await generateRewrite(taskId, selectedStyle, userRequirement.trim() || undefined);
+    // Truncate user requirement to max length if exceeds limit
+    const trimmedRequirement = userRequirement.trim();
+    const finalRequirement = trimmedRequirement.length > MAX_REQUIREMENT_LENGTH 
+      ? trimmedRequirement.slice(0, MAX_REQUIREMENT_LENGTH) 
+      : trimmedRequirement;
+    await generateRewrite(taskId, selectedStyle, finalRequirement || undefined);
   };
   
   const handleQuickTag = (tag: string) => {
@@ -234,20 +313,94 @@ function AIRewriteCenter({
             <div className="w-1 h-3 bg-purple-500 rounded-full" />
             {t('custom_requirement.label')}
           </label>
-          <span className="text-[10px] text-muted-foreground italic">
-            {t('custom_requirement.example')}
-          </span>
+          <div className="flex items-center gap-2">
+            {/* Usage Examples Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+              onClick={() => setShowExamples(!showExamples)}
+            >
+              <Lightbulb className="h-3 w-3 mr-1" />
+              {t('custom_requirement.examples.title')}
+              <ChevronDown className={`h-3 w-3 ml-1 transition-transform ${showExamples ? 'rotate-180' : ''}`} />
+            </Button>
+            <span className="text-[10px] text-muted-foreground italic">
+              {t('custom_requirement.example')}
+            </span>
+            <span className={`text-[10px] font-medium ${
+              isOverLimit 
+                ? 'text-red-500' 
+                : isNearLimit 
+                ? 'text-orange-500' 
+                : 'text-muted-foreground'
+            }`}>
+              {t('custom_requirement.char_limit', { max: MAX_REQUIREMENT_LENGTH })}
+            </span>
+          </div>
         </div>
 
+        {/* Usage Examples Panel */}
+        {showExamples && (
+          <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 p-4 space-y-3 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" />
+                {t('custom_requirement.examples.title')}
+              </h4>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[10px]"
+                onClick={() => setShowExamples(false)}
+              >
+                {t('custom_requirement.examples.close')}
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {exampleScenarios.map((scenario) => (
+                <button
+                  key={scenario.key}
+                  onClick={() => {
+                    setUserRequirement(scenario.example);
+                    setShowExamples(false);
+                  }}
+                  className="text-left p-3 rounded-md border border-purple-200 dark:border-purple-800 bg-white dark:bg-slate-900/50 hover:bg-purple-100 dark:hover:bg-purple-950/30 transition-all group"
+                  disabled={isProcessing || isOverLimit}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">{scenario.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                        {scenario.title}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors">
+                        {scenario.example}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Smart Hint */}
+        {smartHint && !showExamples && (
+          <div className="rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 p-2 text-[10px] text-blue-700 dark:text-blue-300 animate-in fade-in slide-in-from-top-1">
+            {smartHint}
+          </div>
+        )}
+
         {/* Requirement Input Box with Breathing Light Effect */}
-        <div className="relative group">
+        <div className={`relative group ${isOverLimit || isNearLimit ? 'mb-8' : ''}`}>
           {/* Breathing light background layer - purple gradient */}
           <div 
             className={`absolute -inset-0.5 rounded-xl blur transition-all duration-1000 ${
               isOverLimit 
-                ? 'bg-gradient-to-r from-red-600 to-orange-600 opacity-40 animate-pulse' 
+                ? 'bg-gradient-to-r from-red-600 to-orange-600 opacity-50 animate-pulse' 
                 : isNearLimit
-                ? 'bg-gradient-to-r from-orange-600 to-yellow-600 opacity-30'
+                ? 'bg-gradient-to-r from-orange-600 to-yellow-600 opacity-40 animate-pulse'
                 : 'bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 group-hover:opacity-40 group-focus-within:animate-pulse'
             }`}
           />
@@ -257,15 +410,17 @@ function AIRewriteCenter({
             value={userRequirement}
             onChange={(e) => {
               const value = e.target.value;
-              if (value.length <= MAX_REQUIREMENT_LENGTH) {
-                setUserRequirement(value);
-              }
+              // Allow input but show warning if exceeds limit
+              // Button will be disabled when over limit
+              setUserRequirement(value);
             }}
             placeholder={t('custom_requirement.placeholder')}
             className={`relative w-full min-h-[100px] bg-background/60 backdrop-blur-xl border border-primary/20 rounded-xl p-4 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none ${
-              isOverLimit ? 'border-red-500/50' : isNearLimit ? 'border-orange-500/50' : ''
+              isOverLimit ? 'border-red-500/50 focus:ring-red-500/50' : isNearLimit ? 'border-orange-500/50 focus:ring-orange-500/50' : ''
             }`}
             disabled={isProcessing}
+            // Allow slightly over limit to show warning, but truncate on submit
+            maxLength={MAX_REQUIREMENT_LENGTH + 100}
           />
           
           {/* Character count and reset button */}
@@ -279,11 +434,11 @@ function AIRewriteCenter({
                 {t('custom_requirement.reset')}
               </button>
             )}
-            <div className={`text-[10px] px-2 py-1 rounded-md ${
+            <div className={`text-[10px] px-2 py-1 rounded-md font-medium ${
               isOverLimit 
-                ? 'text-red-500 bg-red-500/10' 
+                ? 'text-red-500 bg-red-500/20 border border-red-500/30' 
                 : isNearLimit 
-                ? 'text-orange-500 bg-orange-500/10'
+                ? 'text-orange-500 bg-orange-500/20 border border-orange-500/30'
                 : 'text-muted-foreground bg-background/50'
             }`}>
               {charCount}/{MAX_REQUIREMENT_LENGTH}
@@ -298,6 +453,24 @@ function AIRewriteCenter({
                 : 'bg-muted-foreground/20'
             }`} />
           </div>
+          
+          {/* Character limit warning message */}
+          {isOverLimit && (
+            <div className="absolute -bottom-6 left-0 right-0 text-[10px] text-red-500 font-medium animate-pulse">
+              {t('custom_requirement.char_limit_exceeded', { 
+                current: charCount, 
+                max: MAX_REQUIREMENT_LENGTH 
+              })}
+            </div>
+          )}
+          {isNearLimit && !isOverLimit && (
+            <div className="absolute -bottom-6 left-0 right-0 text-[10px] text-orange-500 font-medium">
+              {t('custom_requirement.char_limit_warning', { 
+                current: charCount, 
+                max: MAX_REQUIREMENT_LENGTH 
+              })}
+            </div>
+          )}
         </div>
 
         {/* Quick Requirement Tags */}
@@ -830,7 +1003,10 @@ export function MediaExtractor({
       if (userCredits < requiredCredits) {
         toast.error(
           t('extractor.insufficient_credits') +
-            ` (需要 ${requiredCredits} 积分，当前 ${userCredits} 积分)`
+            t('extractor.credits_info', { 
+              required: requiredCredits, 
+              current: userCredits 
+            })
         );
         try {
           await fetchUserCredits();
@@ -875,7 +1051,10 @@ export function MediaExtractor({
       if (userCredits < requiredCredits) {
         toast.error(
           t('extractor.insufficient_credits') +
-            ` (需要 ${requiredCredits} 积分，当前 ${userCredits} 积分)`
+            t('extractor.credits_info', { 
+              required: requiredCredits, 
+              current: userCredits 
+            })
         );
         try {
           await fetchUserCredits();
@@ -1752,7 +1931,7 @@ export function MediaExtractor({
                   Task Failed
                 </p>
                 <p className="text-sm text-red-600 dark:text-red-400">
-                  {taskStatus?.errorMessage || taskError || 'Unknown error'}
+                  {taskStatus?.errorMessage || taskError || t('extractor.unknown_error')}
                 </p>
               </div>
             </div>

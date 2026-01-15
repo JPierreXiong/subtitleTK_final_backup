@@ -5,7 +5,12 @@
   },
   "page": {
     "title": "Video Subtitle Extractor",
-    "description": "Extract and translate YouTube and TikTok video subtitles with one click"
+    "description": "Extract and translate YouTube and TikTok video subtitles with one click",
+    "cta": {
+      "title": "Try it free，Analyze Your First YouTube and tiktok Video Now",
+      "button": "analyze your first Video Now",
+      "tip": "No credit card required"
+    }
   },
   "extractor": {
     "title": "Media Extractor",
@@ -40,6 +45,8 @@
     "invalid_url": "Invalid URL. Only YouTube and TikTok are supported.",
     "active_task": "You have an active task. Please wait for it to complete.",
     "insufficient_credits": "Insufficient Credits",
+    "credits_info": " (Required {required} credits, current {current} credits)",
+    "unknown_error": "Unknown error",
     "languages": {
       "en": "English",
       "zh-CN": "Chinese (Simplified)",
@@ -93,10 +100,65 @@
           "more_professional": "More Professional",
           "more_emojis": "Add More Emojis",
           "question_style": "Question Style",
-          "stronger_cta": "Stronger CTA"
+          "stronger_cta": "Stronger CTA",
+          "guide_follow": "Guide Follow",
+          "age_20s": "Target 20s",
+          "age_30s": "Target 30s",
+          "standup_style": "Standup Style",
+          "add_sarcasm": "Add Sarcasm",
+          "more_emotional": "More Emotional",
+          "add_numbers": "Add Numbers",
+          "add_hashtags": "Add Hashtags"
+        },
+        "examples": {
+          "title": "Usage Examples",
+          "close": "Close",
+          "scenarios": {
+            "guide_follow": {
+              "title": "Guide Follow",
+              "example": "Please change the ending to guide users to the homepage to get free materials",
+              "icon": "🎯"
+            },
+            "age_target": {
+              "title": "Age Targeting",
+              "example": "Target 20-year-olds, add more internet slang",
+              "icon": "👥"
+            },
+            "style_convert": {
+              "title": "Style Conversion",
+              "example": "Change to standup comedy style, add more sarcasm and self-deprecation",
+              "icon": "🎭"
+            },
+            "language_optimize": {
+              "title": "Language Optimization",
+              "example": "Translate to authentic American English, use slang and colloquial expressions",
+              "icon": "🌍"
+            },
+            "ending_optimize": {
+              "title": "Ending Optimization",
+              "example": "Optimize the ending part, ensure a strong call-to-action (CTA)",
+              "icon": "✨"
+            },
+            "add_humor": {
+              "title": "Add Humor",
+              "example": "Add more humor elements, use twists and self-deprecation",
+              "icon": "😄"
+            }
+          }
+        },
+        "smart_hints": {
+          "ending": "💡 You can request ending modifications, e.g., 'Change the ending to guide follow'",
+          "style": "💡 You can specify style, e.g., 'Change to standup comedy style'",
+          "age": "💡 You can specify target audience, e.g., 'Target 20-year-olds'",
+          "language": "💡 You can request language optimization, e.g., 'Translate to authentic American English'",
+          "humor": "💡 You can request more humor, e.g., 'Add more sarcasm and self-deprecation'",
+          "length": "💡 You can request length adjustment, e.g., 'Shorten' or 'Add more details'"
         },
         "reset": "Reset",
         "char_count": "{current}/{max}",
+        "char_limit": "Maximum {max} characters",
+        "char_limit_warning": "Approaching character limit ({current}/{max})",
+        "char_limit_exceeded": "Character limit exceeded ({current}/{max}), please remove some content",
         "start_rewrite": "Start Rewrite",
         "rewrite_with_requirement": "Rewrite with Requirement"
       },

@@ -1,0 +1,32 @@
+{
+  "list": {
+    "title": "Testimonials",
+    "crumbs": {
+      "admin": "Admin",
+      "testimonials": "Testimonials"
+    },
+    "buttons": {
+      "add": "Add Testimonial",
+      "edit": "Edit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "delete": "Delete"
+    },
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
+  },
+  "fields": {
+    "name": "Name",
+    "role": "Role",
+    "quote": "Quote",
+    "language": "Language",
+    "status": "Status",
+    "rating": "Rating",
+    "created_at": "Created At",
+    "actions": "Actions"
+  }
+}

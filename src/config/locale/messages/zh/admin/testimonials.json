@@ -1,0 +1,32 @@
+{
+  "list": {
+    "title": "用户评价",
+    "crumbs": {
+      "admin": "管理",
+      "testimonials": "用户评价"
+    },
+    "buttons": {
+      "add": "添加评价",
+      "edit": "编辑",
+      "approve": "批准",
+      "reject": "拒绝",
+      "delete": "删除"
+    },
+    "tabs": {
+      "all": "全部",
+      "pending": "待审核",
+      "approved": "已批准",
+      "rejected": "已拒绝"
+    }
+  },
+  "fields": {
+    "name": "姓名",
+    "role": "角色",
+    "quote": "评价内容",
+    "language": "语言",
+    "status": "状态",
+    "rating": "评分",
+    "created_at": "创建时间",
+    "actions": "操作"
+  }
+}

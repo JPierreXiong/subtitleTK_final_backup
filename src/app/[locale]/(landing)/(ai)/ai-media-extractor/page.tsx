@@ -25,12 +25,12 @@ export default async function AiMediaExtractorPage({
   // Custom CTA for ai-media-extractor page
   const customCta: CTAType = {
     id: 'cta',
-    title: 'Try it free，Analyze Your First YouTube and tiktok Video Now',
+    title: tt('page.cta.title'),
     description: '',
-    tip: '<span style="font-size: 0.75rem; font-weight: 300;">No credit card required</span>',
+    tip: `<span style="font-size: 0.75rem; font-weight: 300;">${tt('page.cta.tip')}</span>`,
     buttons: [
       {
-        title: 'analyze your first Video Now',
+        title: tt('page.cta.button'),
         url: 'https://www.subtitletk.app/ai-media-extractor',
         target: '_self',
         icon: 'Zap',

@@ -105,7 +105,7 @@ export function db(): Database {
       prepare: false, // !!! Required for PgBouncer transaction mode
       max: 10, // Maximum connections in pool
       idle_timeout: 20, // Idle connection timeout (seconds) - reduced for better cleanup
-      connect_timeout: 10, // Connection timeout (seconds)
+      connect_timeout: 5, // Connection timeout (seconds) - reduced to 5s to fail fast in Serverless
       ssl: databaseUrl.includes('supabase') ? 'require' : undefined, // Supabase requires SSL
     });
 
@@ -130,7 +130,7 @@ export function db(): Database {
     prepare: false, // !!! Required for PgBouncer transaction mode
     max: 1, // Use single connection in serverless
     idle_timeout: 20, // 20 seconds idle timeout
-    connect_timeout: 10, // 10 seconds connection timeout
+    connect_timeout: 5, // 5 seconds connection timeout - fail fast to avoid 504 errors
     ssl: databaseUrl.includes('supabase') ? 'require' : undefined, // Supabase requires SSL
   });
 

@@ -17,7 +17,13 @@ import { getEstimatedCreditsCost } from '@/shared/config/plans';
 /**
  * POST /api/media/rewrite
  * Rewrite subtitle content using Gemini AI with streaming support
+ * 
+ * Uses Edge Runtime for better timeout handling and streaming support
+ * Note: Edge Runtime doesn't support all Node.js APIs, but works well for streaming
  */
+export const runtime = 'edge'; // Use Edge Runtime for better timeout handling
+export const maxDuration = 60; // 60 seconds for Edge Runtime (Pro tier: up to 300s)
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -32,14 +38,38 @@ export async function POST(request: NextRequest) {
       return respErr('Style is required');
     }
 
-    // Get current user
-    const user = await getUserInfo();
+    // Get current user (with timeout protection)
+    let user;
+    try {
+      user = await Promise.race([
+        getUserInfo(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('getUserInfo timeout')), 5000)
+        )
+      ]) as Awaited<ReturnType<typeof getUserInfo>>;
+    } catch (error: any) {
+      console.error('[Rewrite] getUserInfo failed:', error);
+      return respErr('Failed to get user info. Please try again.');
+    }
+    
     if (!user) {
       return respErr('no auth, please sign in');
     }
 
-    // Find task
-    const task = await findMediaTaskById(taskId);
+    // Find task (with timeout protection)
+    let task;
+    try {
+      task = await Promise.race([
+        findMediaTaskById(taskId),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('findMediaTaskById timeout')), 5000)
+        )
+      ]) as Awaited<ReturnType<typeof findMediaTaskById>>;
+    } catch (error: any) {
+      console.error('[Rewrite] findMediaTaskById failed:', error);
+      return respErr('Failed to find task. Please try again.');
+    }
+    
     if (!task) {
       return respErr('Task not found');
     }
@@ -61,9 +91,21 @@ export async function POST(request: NextRequest) {
       return respErr('No subtitle content to rewrite');
     }
 
-    // Check credits (rewrite costs 10 credits)
+    // Check credits (rewrite costs 10 credits) - with timeout protection
     const requiredCredits = 10;
-    const remainingCredits = await getRemainingCredits(user.id);
+    let remainingCredits;
+    try {
+      remainingCredits = await Promise.race([
+        getRemainingCredits(user.id),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('getRemainingCredits timeout')), 5000)
+        )
+      ]) as Awaited<ReturnType<typeof getRemainingCredits>>;
+    } catch (error: any) {
+      console.error('[Rewrite] getRemainingCredits failed:', error);
+      return respErr('Failed to check credits. Please try again.');
+    }
+    
     if (remainingCredits < requiredCredits) {
       return respErr(
         `Insufficient credits for rewriting. Required: ${requiredCredits}, Available: ${remainingCredits}`
@@ -73,21 +115,31 @@ export async function POST(request: NextRequest) {
     // Check if task is free trial
     const isFreeTrial = task.isFreeTrial || false;
 
-    // Consume credits (if not free trial)
+    // Consume credits (if not free trial) - with timeout protection
     let consumedCredit = null;
     if (!isFreeTrial) {
-      consumedCredit = await consumeCredits({
-        userId: user.id,
-        credits: requiredCredits,
-        scene: CreditTransactionScene.PAYMENT,
-        description: `Content rewriting: ${style}${userRequirement ? ' (custom)' : ''}`,
-        metadata: JSON.stringify({
-          type: 'media-task-rewrite',
-          taskId,
-          style,
-          hasCustomRequirement: !!userRequirement,
-        }),
-      });
+      try {
+        consumedCredit = await Promise.race([
+          consumeCredits({
+            userId: user.id,
+            credits: requiredCredits,
+            scene: CreditTransactionScene.PAYMENT,
+            description: `Content rewriting: ${style}${userRequirement ? ' (custom)' : ''}`,
+            metadata: JSON.stringify({
+              type: 'media-task-rewrite',
+              taskId,
+              style,
+              hasCustomRequirement: !!userRequirement,
+            }),
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('consumeCredits timeout')), 5000)
+          )
+        ]) as Awaited<ReturnType<typeof consumeCredits>>;
+      } catch (error: any) {
+        console.error('[Rewrite] consumeCredits failed:', error);
+        return respErr('Failed to consume credits. Please try again.');
+      }
     }
 
     // Create SSE stream
@@ -118,11 +170,23 @@ export async function POST(request: NextRequest) {
           );
 
           // Save rewritten content to database (async, don't block)
-          updateMediaTaskById(taskId, {
-            subtitleRewritten: fullContent,
-          }).catch((error) => {
-            console.error('[Rewrite] Failed to save rewritten content:', error);
-          });
+          // Use waitUntil for Vercel to keep function alive during async operation
+          if (typeof globalThis !== 'undefined' && 'waitUntil' in globalThis) {
+            (globalThis as any).waitUntil?.(
+              updateMediaTaskById(taskId, {
+                subtitleRewritten: fullContent,
+              }).catch((error) => {
+                console.error('[Rewrite] Failed to save rewritten content:', error);
+              })
+            );
+          } else {
+            // Fallback for non-Vercel environments
+            updateMediaTaskById(taskId, {
+              subtitleRewritten: fullContent,
+            }).catch((error) => {
+              console.error('[Rewrite] Failed to save rewritten content:', error);
+            });
+          }
 
           controller.close();
         } catch (error: any) {

@@ -5,7 +5,12 @@
   },
   "page": {
     "title": "Extracteur de Sous-titres Vidéo",
-    "description": "Extrayez et traduisez les sous-titres des vidéos YouTube et TikTok en un clic"
+    "description": "Extrayez et traduisez les sous-titres des vidéos YouTube et TikTok en un clic",
+    "cta": {
+      "title": "Essayez gratuitement, Analysez votre première vidéo YouTube et TikTok maintenant",
+      "button": "analyser votre première vidéo maintenant",
+      "tip": "Aucune carte de crédit requise"
+    }
   },
   "extractor": {
     "title": "Extracteur de Médias",
@@ -40,6 +45,8 @@
     "invalid_url": "URL invalide. Seuls YouTube et TikTok sont pris en charge.",
     "active_task": "Vous avez déjà une tâche en cours. Veuillez attendre qu'elle se termine.",
     "insufficient_credits": "Crédits insuffisants",
+    "credits_info": " (Nécessite {required} crédits, actuellement {current} crédits)",
+    "unknown_error": "Erreur inconnue",
     "languages": {
       "en": "Anglais",
       "zh-CN": "Chinois (Simplifié)",
@@ -93,10 +100,65 @@
           "more_professional": "Plus Professionnel",
           "more_emojis": "Ajouter Plus d'Emojis",
           "question_style": "Style de Question",
-          "stronger_cta": "CTA Plus Fort"
+          "stronger_cta": "CTA Plus Fort",
+          "guide_follow": "Guider le Suivi",
+          "age_20s": "Cibler 20 ans",
+          "age_30s": "Cibler 30 ans",
+          "standup_style": "Style Stand-up",
+          "add_sarcasm": "Ajouter du Sarcasme",
+          "more_emotional": "Plus Émotionnel",
+          "add_numbers": "Ajouter des Chiffres",
+          "add_hashtags": "Ajouter des Hashtags"
+        },
+        "examples": {
+          "title": "Exemples d'Utilisation",
+          "close": "Fermer",
+          "scenarios": {
+            "guide_follow": {
+              "title": "Guider le Suivi",
+              "example": "Veuillez changer la fin pour guider les utilisateurs vers la page d'accueil pour obtenir des matériaux gratuits",
+              "icon": "🎯"
+            },
+            "age_target": {
+              "title": "Ciblage par Âge",
+              "example": "Cibler les 20 ans, ajouter plus d'argot Internet",
+              "icon": "👥"
+            },
+            "style_convert": {
+              "title": "Conversion de Style",
+              "example": "Changer en style stand-up, ajouter plus de sarcasme et d'auto-dérision",
+              "icon": "🎭"
+            },
+            "language_optimize": {
+              "title": "Optimisation de la Langue",
+              "example": "Traduire en anglais américain authentique, utiliser l'argot et les expressions familières",
+              "icon": "🌍"
+            },
+            "ending_optimize": {
+              "title": "Optimisation de la Fin",
+              "example": "Optimiser la partie finale, assurer un appel à l'action (CTA) fort",
+              "icon": "✨"
+            },
+            "add_humor": {
+              "title": "Ajouter de l'Humour",
+              "example": "Ajouter plus d'éléments humoristiques, utiliser des retournements et de l'auto-dérision",
+              "icon": "😄"
+            }
+          }
+        },
+        "smart_hints": {
+          "ending": "💡 Vous pouvez demander des modifications de fin, par ex. : 'Changer la fin pour guider le suivi'",
+          "style": "💡 Vous pouvez spécifier un style, par ex. : 'Changer en style stand-up'",
+          "age": "💡 Vous pouvez spécifier le public cible, par ex. : 'Cibler les 20 ans'",
+          "language": "💡 Vous pouvez demander une optimisation de la langue, par ex. : 'Traduire en anglais américain authentique'",
+          "humor": "💡 Vous pouvez demander plus d'humour, par ex. : 'Ajouter plus de sarcasme et d'auto-dérision'",
+          "length": "💡 Vous pouvez demander un ajustement de longueur, par ex. : 'Raccourcir' ou 'Ajouter plus de détails'"
         },
         "reset": "Réinitialiser",
         "char_count": "{current}/{max}",
+        "char_limit": "Maximum {max} caractères",
+        "char_limit_warning": "Limite de caractères approchée ({current}/{max})",
+        "char_limit_exceeded": "Limite de caractères dépassée ({current}/{max}), veuillez supprimer du contenu",
         "start_rewrite": "Commencer la Réécriture",
         "rewrite_with_requirement": "Réécrire selon l'Exigence"
       },

@@ -1,0 +1,32 @@
+{
+  "list": {
+    "title": "Témoignages",
+    "crumbs": {
+      "admin": "Administration",
+      "testimonials": "Témoignages"
+    },
+    "buttons": {
+      "add": "Ajouter un témoignage",
+      "edit": "Modifier",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "delete": "Supprimer"
+    },
+    "tabs": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    }
+  },
+  "fields": {
+    "name": "Nom",
+    "role": "Rôle",
+    "quote": "Citation",
+    "language": "Langue",
+    "status": "Statut",
+    "rating": "Note",
+    "created_at": "Créé le",
+    "actions": "Actions"
+  }
+}
