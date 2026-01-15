@@ -172,6 +172,15 @@
         "hide_original": "Masquer",
         "show_original": "Afficher",
         "original_text": "Original"
+      },
+      "feedback": {
+        "question": "Cela vous a-t-il aidé ?",
+        "comment_placeholder": "Dites-nous ce que vous n'avez pas aimé ? (ex. : trop verbeux, mauvais ton, instruction non suivie...)",
+        "submit": "Soumettre un Commentaire",
+        "submitting": "Envoi en cours...",
+        "submit_success": "Merci pour votre commentaire !",
+        "submit_failed": "Échec de l'envoi du commentaire",
+        "thank_you": "Merci pour votre commentaire ! Nous continuerons à améliorer ce style."
       }
     },
     "dynamic_status": {

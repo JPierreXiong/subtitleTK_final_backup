@@ -685,3 +685,34 @@ export const videoCache = pgTable(
     index('idx_video_cache_expires').on(table.expiresAt),
   ]
 );
+
+// User feedback for AI rewrite feature
+export const rewriteFeedback = pgTable(
+  'rewrite_feedback',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    taskId: text('task_id')
+      .notNull()
+      .references(() => mediaTasks.id, { onDelete: 'cascade' }),
+    rating: integer('rating').notNull(), // 1-5 (1=thumbs down, 5=thumbs up)
+    comment: text('comment'), // Optional detailed feedback
+    style: text('style'), // The rewrite style used (tiktok, youtube, etc.)
+    metadata: text('metadata'), // JSON string for additional data (textLength, etc.)
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    // Query feedback by task
+    index('idx_rewrite_feedback_task').on(table.taskId),
+    // Query feedback by user
+    index('idx_rewrite_feedback_user').on(table.userId),
+    // Query feedback by rating
+    index('idx_rewrite_feedback_rating').on(table.rating),
+  ]
+);

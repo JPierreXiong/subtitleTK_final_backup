@@ -172,6 +172,15 @@
         "hide_original": "隐藏",
         "show_original": "查看",
         "original_text": "原文"
+      },
+      "feedback": {
+        "question": "这对您有帮助吗？",
+        "comment_placeholder": "告诉我们哪里不满意？（如：太啰嗦、语气不对、指令未执行...）",
+        "submit": "提交反馈",
+        "submitting": "提交中...",
+        "submit_success": "感谢您的反馈！",
+        "submit_failed": "提交反馈失败",
+        "thank_you": "感谢您的反馈！我们将针对此风格继续改进。"
       }
     },
     "dynamic_status": {

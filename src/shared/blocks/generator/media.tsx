@@ -65,6 +65,7 @@ import {
   sanitizeFileName,
 } from '@/shared/utils/subtitle-download';
 import { useAIRewrite, RewriteStyle } from '@/shared/hooks/use-ai-rewrite';
+import { RewriteFeedback } from '@/shared/components/media/RewriteFeedback';
 
 interface MediaExtractorProps {
   srOnlyTitle?: string;
@@ -598,6 +599,15 @@ function AIRewriteCenter({
             {originalText}
           </div>
         </div>
+      )}
+
+      {/* Feedback Component - Show only when rewrite is completed */}
+      {displayText && !isProcessing && (
+        <RewriteFeedback
+          taskId={taskId}
+          rewrittenText={displayText}
+          style={selectedStyle}
+        />
       )}
     </div>
   );

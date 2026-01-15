@@ -172,6 +172,15 @@
         "hide_original": "Hide",
         "show_original": "Show",
         "original_text": "Original"
+      },
+      "feedback": {
+        "question": "Was this helpful?",
+        "comment_placeholder": "Tell us what you didn't like? (e.g., too verbose, wrong tone, instruction not followed...)",
+        "submit": "Submit Feedback",
+        "submitting": "Submitting...",
+        "submit_success": "Thank you for your feedback!",
+        "submit_failed": "Failed to submit feedback",
+        "thank_you": "Thank you for your feedback! We will continue to improve this style."
       }
     },
     "dynamic_status": {
