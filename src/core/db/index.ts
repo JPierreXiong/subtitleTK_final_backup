@@ -11,6 +11,12 @@ import { isCloudflareWorker } from '@/shared/lib/env';
 type Database = any;
 
 // Global database connection instance (singleton pattern)
+// Use global object to prevent HMR from recreating connections in development
+const globalForDb = global as unknown as {
+  dbInstance: Database | undefined;
+  client: ReturnType<typeof postgres> | ReturnType<typeof createClient> | undefined;
+};
+
 let dbInstance: Database | null = null;
 let client: ReturnType<typeof postgres> | ReturnType<typeof createClient> | null = null;
 
@@ -83,49 +89,81 @@ export function db(): Database {
 
   // Singleton mode: reuse existing connection (good for traditional servers)
   if (envConfigs.db_singleton_enabled === 'true') {
+    // Check global first (prevents HMR from recreating connections)
+    if (globalForDb.dbInstance) {
+      return globalForDb.dbInstance;
+    }
+    
     // Return existing instance if already initialized
     if (dbInstance) {
       return dbInstance;
     }
 
     // Create connection pool only once
+    // Critical: prepare: false is required for Supabase PgBouncer (port 6543)
     client = postgres(databaseUrl, {
-      prepare: false,
+      prepare: false, // !!! Required for PgBouncer transaction mode
       max: 10, // Maximum connections in pool
-      idle_timeout: 30, // Idle connection timeout (seconds)
+      idle_timeout: 20, // Idle connection timeout (seconds) - reduced for better cleanup
       connect_timeout: 10, // Connection timeout (seconds)
+      ssl: databaseUrl.includes('supabase') ? 'require' : undefined, // Supabase requires SSL
     });
 
     dbInstance = drizzle({ client });
+    
+    // Store in global to prevent HMR recreation
+    globalForDb.client = client;
+    globalForDb.dbInstance = dbInstance;
+    
     return dbInstance;
   }
 
-  // Non-singleton mode: create new connection each time (good for serverless)
+  // Non-singleton mode: use global to prevent connection explosion in Serverless
+  // Even in non-singleton mode, we use global to prevent HMR from creating multiple connections
+  if (globalForDb.dbInstance) {
+    return globalForDb.dbInstance;
+  }
+
+  // Create connection for serverless (but still use global to prevent HMR issues)
   // In serverless, the connection will be cleaned up when the function instance is destroyed
   const serverlessClient = postgres(databaseUrl, {
-    prepare: false,
+    prepare: false, // !!! Required for PgBouncer transaction mode
     max: 1, // Use single connection in serverless
-    idle_timeout: 20,
-    connect_timeout: 10,
+    idle_timeout: 20, // 20 seconds idle timeout
+    connect_timeout: 10, // 10 seconds connection timeout
+    ssl: databaseUrl.includes('supabase') ? 'require' : undefined, // Supabase requires SSL
   });
 
-  return drizzle({ client: serverlessClient }) as Database;
+  const serverlessDb = drizzle({ client: serverlessClient }) as Database;
+  
+  // Store in global to prevent HMR from creating multiple connections
+  globalForDb.client = serverlessClient;
+  globalForDb.dbInstance = serverlessDb;
+  
+  return serverlessDb;
 }
 
 // Optional: Function to close database connection (useful for testing or graceful shutdown)
 // Note: Only works in singleton mode
 export async function closeDb() {
-  if (envConfigs.db_singleton_enabled && client) {
-    const provider = envConfigs.database_provider;
+  const provider = envConfigs.database_provider;
+  const conn = globalForDb.client || client;
+  
+  if (conn) {
     if (provider === 'sqlite' || provider === 'turso') {
       // SQLite client doesn't have an end() method, just clear references
+      globalForDb.client = undefined;
+      globalForDb.dbInstance = undefined;
       client = null;
       dbInstance = null;
     } else {
       // PostgreSQL client
-      await (client as ReturnType<typeof postgres>).end();
+      await (conn as ReturnType<typeof postgres>).end();
+      globalForDb.client = undefined;
+      globalForDb.dbInstance = undefined;
       client = null;
       dbInstance = null;
     }
+    console.log('[DB] Database connection closed');
   }
 }
