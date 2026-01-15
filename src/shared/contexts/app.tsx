@@ -36,8 +36,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   // sign user
   const [user, setUser] = useState<User | null>(null);
 
-  // session
-  const { data: session, isPending } = useSession();
+  // session with error handling for network issues
+  const { data: session, isPending, error: sessionError } = useSession();
+
+  // Handle network errors gracefully (ERR_NETWORK_IO_SUSPENDED, etc.)
+  useEffect(() => {
+    if (sessionError) {
+      // Only log non-network errors to avoid console spam
+      const errorMessage = sessionError instanceof Error ? sessionError.message : String(sessionError);
+      if (!errorMessage.includes('ERR_NETWORK_IO_SUSPENDED') && 
+          !errorMessage.includes('Failed to fetch') &&
+          !errorMessage.includes('NetworkError')) {
+        console.warn('[Auth] Session error (non-critical):', errorMessage);
+      }
+    }
+  }, [sessionError]);
 
   // is check sign (true during SSR and initial render to avoid hydration mismatch when auth is enabled)
   const [isCheckSign, setIsCheckSign] = useState(!!envConfigs.auth_secret);

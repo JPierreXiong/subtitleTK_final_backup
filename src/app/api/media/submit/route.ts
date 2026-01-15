@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 
 import { respData, respErr } from '@/shared/lib/resp';
 import { getUserInfo } from '@/shared/models/user';
@@ -9,6 +10,7 @@ import {
 } from '@/shared/models/media_task';
 import { getUuid } from '@/shared/lib/hash';
 import { fetchMediaFromRapidAPI } from '@/shared/services/media/rapidapi';
+import type { NormalizedMediaData } from '@/extensions/media';
 import {
   uploadVideoToStorage,
   uploadVideoToR2,
@@ -35,10 +37,125 @@ import {
 import { sendTaskHeartbeat } from '@/shared/utils/task-heartbeat';
 
 /**
+ * Configure max duration for this route
+ * This allows waitUntil to have sufficient time to complete long-running tasks
+ * Note: Vercel Free tier has 10s limit (cannot be overridden)
+ * Vercel Pro tier supports up to 300s (5 minutes)
+ * The actual limit is also configured in vercel.json
+ */
+export const maxDuration = 180; // 3 minutes (for Vercel Pro tier)
+
+/**
+ * Trigger internal processing endpoint
+ * This is more reliable than setTimeout in Vercel Serverless environment
+ * The internal endpoint runs in a separate instance and can have longer timeout
+ */
+async function triggerInternalProcessing(
+  taskId: string,
+  url: string,
+  outputType: 'subtitle' | 'video',
+  userId: string
+): Promise<void> {
+  try {
+    // Get the site URL (for internal API calls)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+                    'http://localhost:3000';
+    
+    // Trigger internal processing endpoint (don't await to avoid blocking)
+    // This endpoint runs in a separate instance and can handle longer tasks
+    fetch(`${siteUrl}/api/media/process-internal`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Optional: Add internal auth header for security
+        // 'X-Internal-Auth': process.env.INTERNAL_AUTH_TOKEN || '',
+      },
+      body: JSON.stringify({
+        taskId,
+        url,
+        outputType,
+        userId,
+      }),
+    }).catch(async (fetchError: any) => {
+      // If internal endpoint trigger fails, use setTimeout as last resort
+      console.error('[Internal Processing Trigger Failed]', {
+        taskId,
+        error: fetchError.message,
+      });
+      console.log(`[Fallback] Using setTimeout for task ${taskId}`);
+      
+      setTimeout(() => {
+        processMediaTask(taskId, url, outputType, userId).catch(async (error) => {
+          console.error('[Background Task Failed]', {
+            taskId,
+            url,
+            outputType,
+            error: error.message,
+            stack: error.stack,
+          });
+          
+          try {
+            const failedTask = await findMediaTaskById(taskId);
+            await updateMediaTaskById(taskId, {
+              status: 'failed',
+              errorMessage: error.message || 'Background processing failed',
+              progress: 0,
+              creditId: failedTask?.creditId || null,
+            });
+            console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+          } catch (updateError: any) {
+            console.error('[Failed to Update Task Status]', {
+              taskId,
+              updateError: updateError.message,
+            });
+          }
+        });
+      }, 100); // Defer by 100ms to ensure response is sent first
+    });
+  } catch (error: any) {
+    // If trigger function itself fails, use setTimeout as last resort
+    console.error('[Trigger Internal Processing Failed]', {
+      taskId,
+      error: error.message,
+    });
+    
+    setTimeout(() => {
+      processMediaTask(taskId, url, outputType, userId).catch(async (error) => {
+        console.error('[Background Task Failed]', {
+          taskId,
+          url,
+          outputType,
+          error: error.message,
+          stack: error.stack,
+        });
+        
+        try {
+          const failedTask = await findMediaTaskById(taskId);
+          await updateMediaTaskById(taskId, {
+            status: 'failed',
+            errorMessage: error.message || 'Background processing failed',
+            progress: 0,
+            creditId: failedTask?.creditId || null,
+          });
+          console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
+        } catch (updateError: any) {
+          console.error('[Failed to Update Task Status]', {
+            taskId,
+            updateError: updateError.message,
+          });
+        }
+      });
+    }, 100);
+  }
+}
+
+/**
  * Process media task asynchronously
  * This function runs in the background and updates task status
+ * Exported for use in internal processing endpoint
  */
-async function processMediaTask(
+export async function processMediaTask(
   taskId: string,
   url: string,
   outputType: 'subtitle' | 'video',
@@ -138,19 +255,36 @@ async function processMediaTask(
     // This prevents watchdog from killing tasks that are actually running
     await sendTaskHeartbeat(taskId, 20); // Update progress to 20, heartbeat updated_at
 
-    // Add overall timeout protection (8 seconds max for Vercel Free tier)
-    // Note: Individual API calls already have 8s timeout, this is a safety net
-    const API_CALL_TIMEOUT = 8000; // 8 seconds (for Vercel Free tier)
+    // Add overall timeout protection
+    // Note: Since we use waitUntil for async processing, we can use longer timeout
+    // vercel.json configures maxDuration: 180s for media APIs
+    // Set timeout to 25 seconds to allow RapidAPI enough time while staying safe
+    const API_CALL_TIMEOUT = 25000; // 25 seconds (allows RapidAPI more time to respond)
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
-        reject(new Error('API call timeout: Request took longer than 8 seconds'));
+        reject(new Error('API call timeout: Request took longer than 25 seconds. The video may be too long or the API is slow. Please try again.'));
       }, API_CALL_TIMEOUT);
     });
     
-    const mediaData = await Promise.race([
-      fetchMediaFromRapidAPI(url, outputType || 'subtitle'),
-      timeoutPromise,
-    ]);
+    let mediaData: NormalizedMediaData;
+    try {
+      mediaData = await Promise.race([
+        fetchMediaFromRapidAPI(url, outputType || 'subtitle'),
+        timeoutPromise,
+      ]);
+    } catch (error: any) {
+      // Handle timeout with better error message
+      if (error.message?.includes('timeout')) {
+        console.error(`[Process Task] API timeout for ${url}:`, error.message);
+        await updateMediaTaskById(taskId, {
+          status: 'failed',
+          errorMessage: `API timeout: ${error.message}. This may happen with long videos or slow API responses. Please try again or use a shorter video.`,
+          progress: 0,
+        });
+        throw error;
+      }
+      throw error;
+    }
 
     // Step 2: Cache the video download URL if this is a video task
     if (outputType === 'video' && mediaData.videoUrl) {
@@ -318,6 +452,9 @@ async function processMediaTask(
 /**
  * POST /api/media/submit
  * Submit a new media extraction task
+ * 
+ * Note: maxDuration is configured in vercel.json (180 seconds for media APIs)
+ * This allows waitUntil to have sufficient time to complete long-running tasks
  */
 export async function POST(request: NextRequest) {
   try {
@@ -353,6 +490,72 @@ export async function POST(request: NextRequest) {
     if (!currentUser) {
       return respErr('no auth, please sign in');
     }
+
+    // 🎯 P-1: Cache Hit Check - Check for completed tasks with same URL within 24 hours
+    // This can save significant RapidAPI costs for popular videos
+    // Strategy: Find completed tasks with same URL and outputType, reuse their data
+    try {
+      const { findCachedTask } = await import('@/shared/services/media/task-cache');
+      const cachedTask = await findCachedTask(url.trim(), outputType || 'subtitle');
+
+      if (cachedTask) {
+        console.log(`[Task Cache] Hit for URL: ${url.substring(0, 100)}... (outputType: ${outputType})`);
+        
+        // Create a new task record with cached data (no API call, no credit consumption for processing)
+        // User still needs to pay for the task, but we skip RapidAPI and processing
+        const taskId = getUuid();
+        const cachedTaskRecord = {
+          id: taskId,
+          userId: currentUser.id,
+          platform: cachedTask.platform as 'youtube' | 'tiktok',
+          videoUrl: url.trim(),
+          outputType: outputType || 'subtitle',
+          targetLang: targetLang || null,
+          status: 'extracted' as const, // Directly mark as extracted (ready for translation)
+          progress: 100,
+          // Copy cached metadata
+          title: cachedTask.title,
+          author: cachedTask.author,
+          thumbnailUrl: cachedTask.thumbnailUrl,
+          duration: cachedTask.duration,
+          likes: cachedTask.likes,
+          views: cachedTask.views,
+          shares: cachedTask.shares,
+          publishedAt: cachedTask.publishedAt,
+          sourceLang: cachedTask.sourceLang,
+          // Copy cached results
+          subtitleRaw: cachedTask.subtitleRaw,
+          subtitleTranslated: cachedTask.subtitleTranslated,
+          videoUrlInternal: cachedTask.videoUrlInternal,
+          expiresAt: cachedTask.expiresAt,
+          isFreeTrial: false, // Cached tasks are not free trials
+        };
+
+        // Calculate required credits for cached task (same as normal task)
+        const cachedRequiredCredits = outputType === 'video' ? 15 : 10;
+        
+        // Create task (still consume credits, but no processing cost)
+        // For cached tasks, we can optionally reduce credit cost, but for now keep it same
+        await createMediaTask(cachedTaskRecord, cachedRequiredCredits);
+
+        console.log(`[Task Cache] Created cached task ${taskId} from cache ${cachedTask.id}`);
+
+        // Return immediately with completed status
+        return respData({
+          taskId: taskId,
+          message: 'Task completed from cache (no API call needed)',
+          isCached: true, // Flag to indicate this was from cache
+        });
+      }
+    } catch (cacheError: any) {
+      // If cache check fails, log but continue with normal flow
+      console.warn('[Task Cache] Cache check failed, continuing with normal flow', {
+        error: cacheError.message,
+      });
+    }
+
+    // ❌ Cache miss: Continue with normal processing flow
+    console.log(`[Task Cache] Miss for URL: ${url.substring(0, 100)}... (outputType: ${outputType})`);
 
     // Calculate required credits
     // Video download only: 15 credits (no subtitle extraction charge)
@@ -431,106 +634,74 @@ export async function POST(request: NextRequest) {
       await createMediaTask(newTask, requiredCredits);
     }
 
-    // Start async processing
-    // Option 1: Use Worker/Queue (if enabled)
-    // Option 2: Use setTimeout (fallback for compatibility)
-    const { isWorkerEnabled, enqueueMediaTask } = await import('@/shared/services/queue/qstash');
+    // Start async processing with multi-layer fallback strategy
+    // Priority 0 (P0): waitUntil - Native Vercel solution, zero cost, best performance
+    // Priority 1 (P1): Worker/Queue (QStash) - Most reliable for high concurrency
+    // Priority 2 (P2): Internal processing endpoint - More reliable than setTimeout
+    // Priority 3 (P3): setTimeout - Last resort fallback
     
-    if (isWorkerEnabled()) {
-      // Use Worker via QStash Queue
-      try {
-        await enqueueMediaTask(
-          taskId,
-          url,
-          outputType || 'subtitle',
-          currentUser.id
-        );
-        console.log(`[Queue] Task ${taskId} enqueued to Worker`);
-      } catch (queueError: any) {
-        console.error('[Queue Error]', {
-          taskId,
-          error: queueError.message,
-        });
-        // Fallback to setTimeout if queue fails
-        console.log(`[Fallback] Using setTimeout for task ${taskId}`);
-        setTimeout(() => {
-          processMediaTask(
+    // P0: Try waitUntil first (native Vercel solution)
+    // waitUntil ensures the task continues executing even after response is sent
+    // It runs in the same request context, sharing cookies/auth automatically
+    try {
+      waitUntil(
+        processMediaTask(taskId, url, outputType || 'subtitle', currentUser.id)
+          .then(() => {
+            console.log(`[waitUntil] Task ${taskId} completed successfully`);
+          })
+          .catch(async (error: any) => {
+            console.error('[waitUntil] Task processing failed', {
+              taskId,
+              error: error.message,
+              stack: error.stack,
+            });
+            // Error handling is done inside processMediaTask
+            // This catch is just for logging
+          })
+      );
+      console.log(`[waitUntil] Task ${taskId} processing started via waitUntil`);
+    } catch (waitUntilError: any) {
+      // If waitUntil is not available or fails, fallback to other strategies
+      console.warn('[waitUntil] Not available or failed, using fallback', {
+        taskId,
+        error: waitUntilError.message,
+      });
+      
+      // P1: Fallback to Worker/Queue (QStash) if enabled
+      const { isWorkerEnabled, enqueueMediaTask } = await import('@/shared/services/queue/qstash');
+      
+      if (isWorkerEnabled()) {
+        try {
+          await enqueueMediaTask(
             taskId,
             url,
             outputType || 'subtitle',
             currentUser.id
-          ).catch(async (error) => {
-            console.error('[Background Task Failed]', {
-              taskId,
-              url,
-              outputType,
-              error: error.message,
-              stack: error.stack,
-            });
-            
-            try {
-              const failedTask = await findMediaTaskById(taskId);
-              await updateMediaTaskById(taskId, {
-                status: 'failed',
-                errorMessage: error.message || 'Background processing failed',
-                progress: 0,
-                creditId: failedTask?.creditId || null,
-              });
-              console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
-            } catch (updateError: any) {
-              console.error('[Failed to Update Task Status]', {
-                taskId,
-                updateError: updateError.message,
-              });
-            }
-          });
-        }, 100);
-      }
-    } else {
-      // Use setTimeout (original behavior)
-      // This is critical for Vercel Free tier (10 second limit)
-      // Use setTimeout to defer the actual processing, allowing the response to return immediately
-      setTimeout(() => {
-        processMediaTask(
-          taskId,
-          url,
-          outputType || 'subtitle',
-          currentUser.id
-        ).catch(async (error) => {
-          console.error('[Background Task Failed]', {
+          );
+          console.log(`[Queue] Task ${taskId} enqueued to Worker`);
+        } catch (queueError: any) {
+          console.error('[Queue Error]', {
             taskId,
-            url,
-            outputType,
-            error: error.message,
-            stack: error.stack,
+            error: queueError.message,
           });
-          
-          // Update task status to failed if background task fails
-          // Get task to retrieve creditId for refund
-          try {
-            const failedTask = await findMediaTaskById(taskId);
-            await updateMediaTaskById(taskId, {
-              status: 'failed',
-              errorMessage: error.message || 'Background processing failed',
-              progress: 0,
-              creditId: failedTask?.creditId || null, // Ensure creditId is passed for refund
-            });
-            console.log(`[Task Updated] Task ${taskId} marked as failed, refund should be triggered`);
-          } catch (updateError: any) {
-            console.error('[Failed to Update Task Status]', {
-              taskId,
-              updateError: updateError.message,
-            });
-          }
-        });
-      }, 100); // Defer by 100ms to ensure response is sent first
+          // P2: Fallback to internal processing endpoint
+          await triggerInternalProcessing(taskId, url, outputType || 'subtitle', currentUser.id);
+        }
+      } else {
+        // P2: Use internal processing endpoint (more reliable than setTimeout)
+        await triggerInternalProcessing(taskId, url, outputType || 'subtitle', currentUser.id);
+      }
     }
 
-    // Immediately return task ID
-    return respData({
-      taskId: taskId,
-      message: 'Task submitted successfully',
-    });
+    // Immediately return task ID (202 Accepted for async processing)
+    return Response.json(
+      {
+        code: 0,
+        message: 'Task submitted successfully',
+        data: { taskId: taskId },
+      },
+      { status: 202 }
+    );
   } catch (error: any) {
     console.error('Media submit failed:', error);
     return respErr(error.message || 'Failed to submit media task');

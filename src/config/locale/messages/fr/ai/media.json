@@ -54,7 +54,92 @@
       "ar": "Arabe",
       "hi": "Hindi"
     },
-    "cost_info": "* Coût : 10-15 Crédits par demande (10 pour extraction, 15 pour téléchargement vidéo ou traduction)"
+    "cost_info": "* Coût : 10-15 Crédits par demande (10 pour extraction, 15 pour téléchargement vidéo ou traduction)",
+    "status": {
+      "pending": "Soumission de la tâche...",
+      "processing": "Extraction des médias...",
+      "extracted": "Extraction terminée !",
+      "translating": "Traduction des sous-titres...",
+      "completed": "Traduction terminée !",
+      "failed": "Échec"
+    },
+    "progress": {
+      "extraction": "Progression de l'Extraction",
+      "translation": "Progression de la Traduction"
+    },
+    "rewrite": {
+      "title": "Réécriture de Script Viral IA",
+      "subtitle": "Laissez l'IA vous aider à restructurer des scripts viraux",
+      "status": {
+        "generating": "Génération...",
+        "saved": "Enregistré",
+        "completed": "Terminé",
+        "pending": "En attente"
+      },
+      "styles": {
+        "tiktok": "Viral TikTok",
+        "youtube": "Premium YouTube",
+        "redbook": "Style de Vie Xiaohongshu",
+        "emotional": "Résonance Émotionnelle",
+        "script": "Script Professionnel"
+      },
+      "custom_requirement": {
+        "label": "Exigence de Réécriture Personnalisée (Optionnel)",
+        "placeholder": "Entrez vos exigences de réécriture spécifiques, Gemini personnalisera pour vous...",
+        "example": "ex. : Rendre plus humoristique / Ajouter plus d'Emojis",
+        "quick_tags": {
+          "more_humorous": "Plus Humoristique",
+          "shorter": "Plus Court",
+          "more_professional": "Plus Professionnel",
+          "more_emojis": "Ajouter Plus d'Emojis",
+          "question_style": "Style de Question",
+          "stronger_cta": "CTA Plus Fort"
+        },
+        "reset": "Réinitialiser",
+        "char_count": "{current}/{max}",
+        "start_rewrite": "Commencer la Réécriture",
+        "rewrite_with_requirement": "Réécrire selon l'Exigence"
+      },
+      "actions": {
+        "copy": "Copier dans le Presse-papiers",
+        "copy_success": "Copié dans le Presse-papiers",
+        "copy_failed": "Échec de la Copie",
+        "export_txt": "Exporter en TXT",
+        "export_srt": "Exporter en SRT",
+        "export_success": "Exporté au format {format}",
+        "hide_original": "Masquer",
+        "show_original": "Afficher",
+        "original_text": "Original"
+      }
+    },
+    "dynamic_status": {
+      "extraction": {
+        "stage_0": "Établissement de la connexion sécurisée...",
+        "stage_1": "Analyse des métadonnées et pistes vidéo...",
+        "stage_2": "Déploiement des ressources API distribuées mondiales...",
+        "stage_3": "Extraction des caractéristiques audio via réseau neuronal...",
+        "stage_4": "Création de scripts viraux avec Gemini 2.5...",
+        "stage_5": "Finalisation de la validation du format et de la sortie..."
+      },
+      "translation": {
+        "stage_0": "Connexion au moteur IA Gemini...",
+        "stage_1": "Analyse approfondie de la sémantique originale...",
+        "stage_2": "Restructuration de l'accroche dorée de 3 secondes...",
+        "stage_3": "Injection du vocabulaire viral du réseau...",
+        "stage_4": "Optimisation de l'appel à l'action (CTA)...",
+        "stage_5": "Presque terminé, emballage des données..."
+      },
+      "tips": {
+        "tip_1": "Le saviez-vous ? Les 3 premières secondes d'une vidéo TikTok déterminent 80% du taux de complétion, c'est pourquoi nous renforçons l'Accroche pour vous.",
+        "tip_2": "Les recherches montrent que les titres avec des points d'interrogation ont un taux de clic 33% plus élevé que les déclarations.",
+        "tip_3": "Formule de Script Doré = Accroche + Valeur + CTA.",
+        "tip_4": "En utilisant l'analyse sémantique Gemini 2.5, nous pouvons capturer plus précisément les points de retournement émotionnels dans la vidéo originale.",
+        "tip_5": "L'utilisation d'Emojis appropriés peut augmenter le plaisir de lecture de 15%, rendant votre texte plus engageant.",
+        "tip_6": "La durée dorée pour les vidéos courtes est généralement de 7-15 secondes, assurant un rythme de contenu serré.",
+        "tip_7": "Ajouter des chiffres aux titres (comme '3 Secrets' ou '5 Étapes') peut augmenter considérablement les taux de clic.",
+        "tip_8": "Utiliser des tags de sujets tendance (Hashtags) peut augmenter l'exposition vidéo, mais n'en abusez pas."
+      }
+    }
   }
 }
 

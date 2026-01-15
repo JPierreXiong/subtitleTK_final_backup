@@ -54,6 +54,91 @@
       "ar": "Arabic",
       "hi": "Hindi"
     },
-    "cost_info": "* Cost: 10-15 credits per request (Extract 10 credits, Video download or Translation 15 credits)"
+    "cost_info": "* Cost: 10-15 credits per request (Extract 10 credits, Video download or Translation 15 credits)",
+    "status": {
+      "pending": "Submitting task...",
+      "processing": "Extracting media...",
+      "extracted": "Extraction completed!",
+      "translating": "Translating subtitles...",
+      "completed": "Translation completed!",
+      "failed": "Failed"
+    },
+    "progress": {
+      "extraction": "Extraction Progress",
+      "translation": "Translation Progress"
+    },
+    "rewrite": {
+      "title": "AI Viral Script Rewriter",
+      "subtitle": "Let AI help you restructure viral scripts",
+      "status": {
+        "generating": "Generating...",
+        "saved": "Saved",
+        "completed": "Completed",
+        "pending": "Pending"
+      },
+      "styles": {
+        "tiktok": "TikTok Viral",
+        "youtube": "YouTube Premium",
+        "redbook": "Xiaohongshu Lifestyle",
+        "emotional": "Emotional Resonance",
+        "script": "Professional Script"
+      },
+      "custom_requirement": {
+        "label": "Custom Rewrite Requirement (Optional)",
+        "placeholder": "Enter your specific rewrite requirements, Gemini will customize for you...",
+        "example": "e.g., Make it more humorous / Add more Emojis",
+        "quick_tags": {
+          "more_humorous": "More Humorous",
+          "shorter": "Shorter",
+          "more_professional": "More Professional",
+          "more_emojis": "Add More Emojis",
+          "question_style": "Question Style",
+          "stronger_cta": "Stronger CTA"
+        },
+        "reset": "Reset",
+        "char_count": "{current}/{max}",
+        "start_rewrite": "Start Rewrite",
+        "rewrite_with_requirement": "Rewrite with Requirement"
+      },
+      "actions": {
+        "copy": "Copy to Clipboard",
+        "copy_success": "Copied to Clipboard",
+        "copy_failed": "Copy Failed",
+        "export_txt": "Export as TXT",
+        "export_srt": "Export as SRT",
+        "export_success": "Exported as {format} format",
+        "hide_original": "Hide",
+        "show_original": "Show",
+        "original_text": "Original"
+      }
+    },
+    "dynamic_status": {
+      "extraction": {
+        "stage_0": "Establishing secure connection...",
+        "stage_1": "Parsing video metadata & tracks...",
+        "stage_2": "Dispatching global distributed API resources...",
+        "stage_3": "Extracting audio features via neural network...",
+        "stage_4": "Crafting viral scripts with Gemini 2.5...",
+        "stage_5": "Finalizing format validation & output..."
+      },
+      "translation": {
+        "stage_0": "Connecting to Gemini AI engine...",
+        "stage_1": "Deep parsing original semantics...",
+        "stage_2": "Restructuring golden 3-second hook...",
+        "stage_3": "Injecting viral network vocabulary...",
+        "stage_4": "Optimizing call-to-action (CTA)...",
+        "stage_5": "Almost done, packaging data..."
+      },
+      "tips": {
+        "tip_1": "Did you know? The first 3 seconds of a TikTok video determine 80% of the completion rate, which is why we're strengthening the Hook for you.",
+        "tip_2": "Research shows that titles with question marks have 33% higher click-through rates than statements.",
+        "tip_3": "Golden Script Formula = Hook + Value + CTA.",
+        "tip_4": "Using Gemini 2.5 semantic analysis, we can more accurately capture emotional turning points in the original video.",
+        "tip_5": "Using appropriate Emojis can increase reading pleasure by 15%, making your copy more engaging.",
+        "tip_6": "The golden duration for short videos is typically 7-15 seconds, ensuring your content rhythm is tight.",
+        "tip_7": "Adding numbers to titles (like '3 Secrets' or '5 Steps') can significantly increase click-through rates.",
+        "tip_8": "Using trending topic tags (Hashtags) can increase video exposure, but don't overdo it."
+      }
+    }
   }
 }

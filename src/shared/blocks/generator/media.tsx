@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AlertCircle,
   Calendar as CalendarIcon,
@@ -10,12 +10,16 @@ import {
   Download,
   ExternalLink,
   FileText,
+  FileVideo,
   Info,
   Loader2,
   Sparkles,
+  Type,
   User,
   Video,
   X,
+  Zap,
+  Send,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -30,6 +34,7 @@ import {
 } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
 import { Progress } from '@/shared/components/ui/progress';
 import {
   Select,
@@ -48,8 +53,16 @@ import {
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { useAppContext } from '@/shared/contexts/app';
 import { useMediaTask } from '@/shared/hooks/use-media-task';
+import { useDynamicStatus } from '@/shared/hooks/use-dynamic-status';
 import { cn } from '@/shared/lib/utils';
 import { getEstimatedCreditsCost } from '@/shared/config/plans';
+import {
+  downloadSRT,
+  downloadTXT,
+  downloadVTT,
+  sanitizeFileName,
+} from '@/shared/utils/subtitle-download';
+import { useAIRewrite, RewriteStyle } from '@/shared/hooks/use-ai-rewrite';
 
 interface MediaExtractorProps {
   srOnlyTitle?: string;
@@ -72,6 +85,350 @@ const TARGET_LANGUAGES = [
   { value: 'ar', label: 'Arabic' },
   { value: 'hi', label: 'Hindi' },
 ];
+
+// AI Rewrite Center Component
+interface AIRewriteCenterProps {
+  taskId: string;
+  originalText: string;
+  rewrittenText?: string;
+  title?: string;
+  author?: string;
+}
+
+function AIRewriteCenter({
+  taskId,
+  originalText,
+  rewrittenText: initialRewrittenText,
+  title,
+  author,
+}: AIRewriteCenterProps) {
+  const t = useTranslations('ai.media.extractor.rewrite');
+  const { output, isProcessing, error, generateRewrite, reset } = useAIRewrite();
+  const [selectedStyle, setSelectedStyle] = useState<RewriteStyle>('tiktok');
+  const [hasCopied, setHasCopied] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [userRequirement, setUserRequirement] = useState<string>('');
+  
+  // Quick requirement tags - using translations
+  const quickTags = [
+    { key: 'more_humorous', tag: t('custom_requirement.quick_tags.more_humorous') },
+    { key: 'shorter', tag: t('custom_requirement.quick_tags.shorter') },
+    { key: 'more_professional', tag: t('custom_requirement.quick_tags.more_professional') },
+    { key: 'more_emojis', tag: t('custom_requirement.quick_tags.more_emojis') },
+    { key: 'question_style', tag: t('custom_requirement.quick_tags.question_style') },
+    { key: 'stronger_cta', tag: t('custom_requirement.quick_tags.stronger_cta') },
+  ];
+  
+  // Character limit (500 chars)
+  const MAX_REQUIREMENT_LENGTH = 500;
+  const charCount = userRequirement.length;
+  const isNearLimit = charCount > MAX_REQUIREMENT_LENGTH * 0.8; // 80% = 400 chars
+  const isOverLimit = charCount > MAX_REQUIREMENT_LENGTH;
+
+  // Priority: output (streaming) > initialRewrittenText (saved) > empty
+  const displayText = output || initialRewrittenText || '';
+  const hasExistingRewrite = !!initialRewrittenText && !output;
+
+  const styles: Array<{ id: RewriteStyle; label: string; icon: string }> = [
+    { id: 'tiktok', label: t('styles.tiktok'), icon: '🔥' },
+    { id: 'youtube', label: t('styles.youtube'), icon: '📺' },
+    { id: 'redbook', label: t('styles.redbook'), icon: '📖' },
+    { id: 'emotional', label: t('styles.emotional'), icon: '💫' },
+    { id: 'script', label: t('styles.script'), icon: '🎬' },
+  ];
+
+  const handleRewrite = async () => {
+    reset();
+    await generateRewrite(taskId, selectedStyle, userRequirement.trim() || undefined);
+  };
+  
+  const handleQuickTag = (tag: string) => {
+    if (userRequirement.trim()) {
+      setUserRequirement((prev) => `${prev}，${tag}`);
+    } else {
+      setUserRequirement(tag);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!displayText) return;
+    try {
+      await navigator.clipboard.writeText(displayText);
+      setHasCopied(true);
+      toast.success(t('actions.copy_success'));
+      setTimeout(() => setHasCopied(false), 2000);
+    } catch (error) {
+      toast.error(t('actions.copy_failed'));
+    }
+  };
+
+  const handleExport = (format: 'txt' | 'srt') => {
+    if (!displayText) return;
+    const blob = new Blob([displayText], {
+      type: format === 'txt' ? 'text/plain' : 'text/plain',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Use friendly filename based on title and author
+    const safeAuthor = (author || 'User').trim();
+    const safeTitle = (title || 'Video').trim();
+    const fileName = sanitizeFileName(safeAuthor, safeTitle, format);
+    link.download = fileName.replace(`.${format}`, `_rewritten_${selectedStyle}.${format}`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(t('actions.export_success', { format: format.toUpperCase() }));
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2">
+            <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold">{t('title')}</h3>
+            <p className="text-xs text-muted-foreground">
+              {t('subtitle')}
+            </p>
+          </div>
+        </div>
+        <Badge variant="outline" className="text-[10px]">
+          {isProcessing
+            ? t('status.generating')
+            : hasExistingRewrite
+            ? t('status.saved')
+            : displayText
+            ? t('status.completed')
+            : t('status.pending')}
+        </Badge>
+      </div>
+
+      {/* Style Selector */}
+      <div className="flex flex-wrap gap-2">
+        {styles.map((style) => (
+          <Button
+            key={style.id}
+            variant={selectedStyle === style.id ? 'default' : 'outline'}
+            size="sm"
+            className="text-xs"
+            onClick={() => setSelectedStyle(style.id)}
+            disabled={isProcessing}
+          >
+            <span className="mr-1">{style.icon}</span>
+            {style.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Custom Requirement Input */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <label className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider flex items-center gap-2">
+            <div className="w-1 h-3 bg-purple-500 rounded-full" />
+            {t('custom_requirement.label')}
+          </label>
+          <span className="text-[10px] text-muted-foreground italic">
+            {t('custom_requirement.example')}
+          </span>
+        </div>
+
+        {/* Requirement Input Box with Breathing Light Effect */}
+        <div className="relative group">
+          {/* Breathing light background layer - purple gradient */}
+          <div 
+            className={`absolute -inset-0.5 rounded-xl blur transition-all duration-1000 ${
+              isOverLimit 
+                ? 'bg-gradient-to-r from-red-600 to-orange-600 opacity-40 animate-pulse' 
+                : isNearLimit
+                ? 'bg-gradient-to-r from-orange-600 to-yellow-600 opacity-30'
+                : 'bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 group-hover:opacity-40 group-focus-within:animate-pulse'
+            }`}
+          />
+          
+          {/* Actual textarea */}
+          <Textarea
+            value={userRequirement}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.length <= MAX_REQUIREMENT_LENGTH) {
+                setUserRequirement(value);
+              }
+            }}
+            placeholder={t('custom_requirement.placeholder')}
+            className={`relative w-full min-h-[100px] bg-background/60 backdrop-blur-xl border border-primary/20 rounded-xl p-4 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none ${
+              isOverLimit ? 'border-red-500/50' : isNearLimit ? 'border-orange-500/50' : ''
+            }`}
+            disabled={isProcessing}
+          />
+          
+          {/* Character count and reset button */}
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            {userRequirement.length > 0 && (
+              <button 
+                onClick={() => setUserRequirement('')}
+                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors bg-background/50 px-2 py-1 rounded-md"
+                disabled={isProcessing}
+              >
+                {t('custom_requirement.reset')}
+              </button>
+            )}
+            <div className={`text-[10px] px-2 py-1 rounded-md ${
+              isOverLimit 
+                ? 'text-red-500 bg-red-500/10' 
+                : isNearLimit 
+                ? 'text-orange-500 bg-orange-500/10'
+                : 'text-muted-foreground bg-background/50'
+            }`}>
+              {charCount}/{MAX_REQUIREMENT_LENGTH}
+            </div>
+            <div className={`w-1.5 h-1.5 rounded-full ${
+              userRequirement 
+                ? isOverLimit 
+                  ? 'bg-red-500 animate-ping' 
+                  : isNearLimit
+                  ? 'bg-orange-500 animate-pulse'
+                  : 'bg-purple-500 animate-pulse'
+                : 'bg-muted-foreground/20'
+            }`} />
+          </div>
+        </div>
+
+        {/* Quick Requirement Tags */}
+        <div className="flex flex-wrap gap-2 pt-1">
+          {quickTags.map(({ key, tag }) => (
+            <button
+              key={key}
+              onClick={() => handleQuickTag(tag)}
+              disabled={isProcessing || isOverLimit}
+              className="text-[10px] px-2 py-1 rounded-md border border-border bg-background/50 text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              + {tag}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content Preview Area */}
+      <div className="relative min-h-[200px] rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4">
+        {!displayText && !isProcessing && (
+          <div className="flex h-full min-h-[200px] flex-col items-center justify-center space-y-3 text-center">
+            <Sparkles className="h-10 w-10 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm text-muted-foreground">
+              {t('custom_requirement.start_rewrite')}
+            </p>
+            {hasExistingRewrite && (
+              <p className="text-xs text-muted-foreground/70">
+                💡 {t('status.saved')}
+              </p>
+            )}
+          </div>
+        )}
+
+        {isProcessing && !displayText && (
+          <div className="flex h-full min-h-[200px] flex-col items-center justify-center space-y-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">{t('status.generating')}</p>
+          </div>
+        )}
+
+        {displayText && (
+          <div
+            className="whitespace-pre-wrap text-sm leading-relaxed"
+            aria-live="polite"
+          >
+            {displayText}
+            {isProcessing && (
+              <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse" />
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20 p-3 mt-2">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
+          <Button
+            onClick={handleRewrite}
+            disabled={isProcessing || isOverLimit}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t('status.generating')}
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                {userRequirement.trim() ? t('custom_requirement.rewrite_with_requirement') : t('custom_requirement.start_rewrite')}
+              </>
+            )}
+          </Button>
+
+          {displayText && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                {hasCopied ? (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                    {t('actions.copy_success')}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-4 w-4" />
+                    {t('actions.copy')}
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('txt')}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                {t('actions.export_txt')}
+              </Button>
+            </>
+          )}
+        </div>
+
+        {originalText && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowOriginal(!showOriginal)}
+          >
+            {showOriginal ? t('actions.hide_original', { defaultValue: 'Hide' }) : t('actions.show_original', { defaultValue: 'Show' })} {t('actions.original_text', { defaultValue: 'Original' })}
+          </Button>
+        )}
+      </div>
+
+      {/* Original Text Preview (Collapsible) */}
+      {showOriginal && originalText && (
+        <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4">
+          <p className="text-xs font-medium text-muted-foreground mb-2">{t('actions.original_text', { defaultValue: 'Original Text' })}:</p>
+          <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-60 overflow-y-auto">
+            {originalText}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function MediaExtractor({
   className,
@@ -118,6 +475,12 @@ export function MediaExtractor({
   // Computed: is extracting (processing or pending)
   const isExtracting = isPolling && (taskStatus?.status === 'processing' || taskStatus?.status === 'pending');
   
+  // Dynamic status for extraction/translation process
+  const dynamicStatus = useDynamicStatus({
+    isProcessing: isPolling && (taskStatus?.status === 'processing' || taskStatus?.status === 'translating' || taskStatus?.status === 'pending'),
+    mode: taskStatus?.status === 'translating' ? 'translation' : 'extraction',
+  });
+  
   // Calculate estimated credits cost
   // For video output type, assume video-only (no subtitle extraction)
   // User can still get subtitles if available, but won't be charged for extraction
@@ -150,30 +513,52 @@ export function MediaExtractor({
     }
   }, [user]);
 
-  // Fetch direct download URL when video is ready
+  // Fetch direct download URL when video is ready (with duplicate request prevention)
+  const fetchingUrlRef = useRef<boolean>(false);
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchDirectUrl = async () => {
       if (
         taskStatus?.id &&
         taskStatus?.outputType === 'video' &&
         taskStatus?.videoUrlInternal &&
-        (taskStatus?.status === 'extracted' || taskStatus?.status === 'completed')
+        (taskStatus?.status === 'extracted' || taskStatus?.status === 'completed') &&
+        !directDownloadUrl && // 避免重复请求
+        !fetchingUrlRef.current // 防止并发请求
       ) {
+        fetchingUrlRef.current = true;
         try {
           const url = await getVideoDownloadUrl(taskStatus.id);
-          if (url) {
+          if (isMounted && url) {
             setDirectDownloadUrl(url);
           }
-        } catch (error) {
-          console.error('Failed to fetch direct download URL:', error);
+          // 如果 url 为 null（超时或失败），静默处理，不显示错误
+          // 用户仍可通过下载按钮使用 proxy 下载
+        } catch (error: any) {
+          // 这个 catch 现在不应该被触发（因为 getVideoDownloadUrl 返回 null 而不是抛出）
+          // 但保留作为安全网
+          if (isMounted) {
+            console.warn('Failed to fetch direct download URL (will use proxy on download):', error.message);
+          }
+        } finally {
+          fetchingUrlRef.current = false;
         }
-      } else {
-        setDirectDownloadUrl(null);
+      } else if (!taskStatus?.videoUrlInternal || 
+                 (taskStatus?.status !== 'extracted' && taskStatus?.status !== 'completed')) {
+        // 清理状态
+        if (isMounted) {
+          setDirectDownloadUrl(null);
+        }
       }
     };
 
     fetchDirectUrl();
-  }, [taskStatus?.id, taskStatus?.outputType, taskStatus?.videoUrlInternal, taskStatus?.status, getVideoDownloadUrl]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [taskStatus?.id, taskStatus?.outputType, taskStatus?.videoUrlInternal, taskStatus?.status, getVideoDownloadUrl, directDownloadUrl]);
   
   // Handle daily check-in
   const handleCheckIn = async () => {
@@ -199,6 +584,25 @@ export function MediaExtractor({
     } finally {
       setIsCheckingIn(false);
     }
+  };
+
+  // Generate friendly filename from task metadata
+  const getFriendlyFileName = (extension: string, suffix?: string): string => {
+    if (!taskStatus) {
+      return `video.${extension}`;
+    }
+    
+    const author = taskStatus.author || 'User';
+    const title = taskStatus.title || 'Video';
+    const baseName = sanitizeFileName(author, title, extension);
+    
+    // Remove extension, add suffix if provided, then add extension back
+    if (suffix) {
+      const nameWithoutExt = baseName.replace(`.${extension}`, '');
+      return `${nameWithoutExt}_${suffix}.${extension}`;
+    }
+    
+    return baseName;
   };
 
   // CSV Export function
@@ -249,10 +653,9 @@ export function MediaExtractor({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute(
-      'download',
-      `media_export_${taskStatus.id}_${Date.now()}.csv`
-    );
+    // Use friendly filename for CSV export
+    const csvFileName = getFriendlyFileName('csv', 'export').replace('.csv', '') || `media_export_${taskStatus.id}`;
+    link.setAttribute('download', `${csvFileName}_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -260,18 +663,6 @@ export function MediaExtractor({
     toast.success('CSV exported successfully');
   };
 
-  // Download SRT file (create blob from text)
-  const downloadSRT = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   // Handle video download (try direct download first, fallback to proxy)
   const handleVideoDownload = async () => {
@@ -281,84 +672,58 @@ export function MediaExtractor({
       // Show loading state
       toast.loading('Preparing video download...', { id: 'video-download' });
 
-      // Get download URL from API
-      const downloadUrl = await getVideoDownloadUrl(taskStatus.id);
-      if (!downloadUrl) {
-        toast.error('Failed to get download URL', { id: 'video-download' });
-        return;
-      }
+      const triggerDownload = (url: string) => {
+        const link = document.createElement('a');
+        link.href = url;
+        // Use friendly filename based on metadata
+        link.download = getFriendlyFileName('mp4');
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
 
-      // Try direct download first
+      // Try to get signed download URL (may timeout, that's OK)
+      let downloadUrl: string | null = null;
       try {
-        const response = await fetch(downloadUrl, {
-          method: 'GET',
-          headers: {
-            'Accept': 'video/mp4, video/*, */*',
-          },
-        });
+        downloadUrl = await getVideoDownloadUrl(taskStatus.id);
+      } catch (error: any) {
+        // getVideoDownloadUrl should not throw, but if it does, continue to proxy
+        console.warn('[Video Download] Failed to get signed URL, using proxy:', error.message);
+      }
 
-        if (response.ok && response.body) {
-          // Convert response to blob
-          const blob = await response.blob();
-
-          // Create blob URL
-          const blobUrl = URL.createObjectURL(blob);
-
-          // Create download link
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = `video-${taskStatus.id}.mp4`;
-          link.style.display = 'none';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          // Clean up blob URL after a delay
-          setTimeout(() => {
-            URL.revokeObjectURL(blobUrl);
-          }, 100);
-
-          toast.success('Video download started', { id: 'video-download' });
-          return;
+      // If we have a signed URL, try direct download first
+      if (downloadUrl) {
+        try {
+          const headResp = await fetch(downloadUrl, {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(3000), // 3 second timeout for HEAD check
+          });
+          if (headResp.ok) {
+            triggerDownload(downloadUrl);
+            toast.success('Video download started', { id: 'video-download' });
+            return;
+          }
+          console.warn('Direct download HEAD check failed, falling back to proxy');
+        } catch (headError: any) {
+          console.warn('Direct download HEAD check error, falling back to proxy:', headError.message);
+          // Continue to proxy fallback
         }
-      } catch (directError: any) {
-        console.warn('Direct download failed, trying proxy:', directError);
-        // Fall through to proxy download
       }
 
-      // Fallback: Use proxy API for download
+      // Fallback: Use proxy API for download (same-origin, always works)
+      // This is the reliable path when signed URL fails or times out
       const proxyUrl = `/api/media/download-proxy?id=${taskStatus.id}`;
+      triggerDownload(proxyUrl);
       
-      const proxyResponse = await fetch(proxyUrl);
-      
-      if (!proxyResponse.ok) {
-        const errorData = await proxyResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || `Download failed: ${proxyResponse.status} ${proxyResponse.statusText}`);
+      if (!downloadUrl) {
+        // Only show info if we never got a signed URL (silent fallback)
+        toast.success('Video download started', { id: 'video-download' });
+      } else {
+        // Show info if direct download failed but we have proxy
+        toast.info('Using backup download method', { id: 'video-download' });
+        toast.success('Video download started', { id: 'video-download' });
       }
-
-      if (!proxyResponse.body) {
-        throw new Error('Video file has no content');
-      }
-
-      // Convert proxy response to blob
-      const blob = await proxyResponse.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      // Create download link
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `video-${taskStatus.id}.mp4`;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Clean up blob URL after a delay
-      setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-      }, 100);
-
-      toast.success('Video download started', { id: 'video-download' });
     } catch (error: any) {
       console.error('Video download error:', error);
       const errorMessage = error.message || 'Failed to download video';
@@ -529,26 +894,38 @@ export function MediaExtractor({
 
   const getStatusText = () => {
     if (!taskStatus) return '';
+    
+    // Use dynamic status during processing
+    if (isPolling && (taskStatus.status === 'processing' || taskStatus.status === 'translating' || taskStatus.status === 'pending')) {
+      return dynamicStatus.currentLabel;
+    }
+    
     switch (taskStatus.status) {
       case 'pending':
-        return 'Submitting task...';
+        return t('extractor.status.pending');
       case 'processing':
-        return 'Extracting media...';
+        return t('extractor.status.processing');
       case 'extracted':
-        return 'Extraction completed!';
+        return t('extractor.status.extracted');
       case 'translating':
-        return 'Translating subtitles...';
+        return t('extractor.status.translating');
       case 'completed':
-        return 'Translation completed!';
+        return t('extractor.status.completed');
       case 'failed':
-        return 'Failed';
+        return t('extractor.status.failed');
       default:
-        return 'Processing...';
+        return t('extractor.extracting');
     }
   };
 
   const getProgressText = () => {
     if (!taskStatus) return '';
+    
+    // Use dynamic status during processing
+    if (isPolling && (taskStatus.status === 'processing' || taskStatus.status === 'translating' || taskStatus.status === 'pending')) {
+      return dynamicStatus.currentLabel;
+    }
+    
     if (taskStatus.status === 'translating') {
       return 'Gemini is translating (approx. 1 min)...';
     }
@@ -876,136 +1253,415 @@ export function MediaExtractor({
           </Button>
         )}
 
-        {/* Download Buttons Section - Show when extracted or completed */}
+        {/* Download Buttons Section - Enhanced UI with friendly filenames */}
         {(taskStatus?.status === 'extracted' || taskStatus?.status === 'completed') && (
-          <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold flex items-center gap-2">
-                <Download className="h-4 w-4 text-primary" />
-                Ready for Download
-              </h3>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-white dark:bg-slate-950 px-2 py-0.5 rounded border shadow-sm">
+          <div className="mt-6 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-slate-100/50 p-6 dark:from-slate-900/50 dark:to-slate-800/30 dark:border-slate-800 shadow-lg">
+            <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-primary/10 p-2 dark:bg-primary/20">
+                  <Download className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Available Resources</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Click to download in your preferred format
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
                 {taskStatus.status}
-              </span>
+              </Badge>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {/* Original SRT Download */}
-              {taskStatus.subtitleRaw && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white hover:bg-primary/5 dark:bg-slate-950"
-                  onClick={() =>
-                    downloadSRT(
-                      taskStatus.subtitleRaw!,
-                      `original-subtitle-${taskStatus.id}.srt`
-                    )
-                  }
-                >
-                  <FileText className="mr-2 h-4 w-4 text-blue-500" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-xs">Original Subtitles</span>
-                    <span className="text-[10px] text-muted-foreground">SRT Format</span>
-                  </div>
-                </Button>
-              )}
 
-              {/* Video Download - Only show for video output type */}
-              {taskStatus.outputType === 'video' &&
-                taskStatus.videoUrlInternal && (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start bg-white hover:bg-primary/5 dark:bg-slate-950"
-                      onClick={handleVideoDownload}
-                    >
-                      <Video className="mr-2 h-4 w-4 text-red-500" />
-                      <div className="flex flex-col items-start">
-                        <span className="text-xs">Video MP4</span>
-                        <span className="text-[10px] text-muted-foreground">
-                          Original Quality
-                        </span>
-                      </div>
-                    </Button>
-                    
-                    {/* Direct Download Link - Show if URL is available */}
-                    {directDownloadUrl && (
-                      <div className="col-span-full mt-2 rounded-lg border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-800 dark:bg-blue-950/20">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                            Direct Download Link
-                          </span>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
-                              onClick={copyDirectUrl}
-                              title="Copy link"
-                            >
-                              <Copy className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
-                              onClick={openDirectUrl}
-                              title="Open in new tab"
-                            >
-                              <ExternalLink className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                            </Button>
+            <div className="space-y-4">
+              {/* Video Download - Primary Action (if video output) */}
+              {taskStatus.outputType === 'video' && taskStatus.videoUrlInternal && (
+                <div className="rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                  <Button
+                    onClick={handleVideoDownload}
+                    className="w-full h-auto p-0 bg-transparent hover:bg-transparent"
+                    variant="ghost"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-4">
+                        <div className="rounded-xl bg-primary p-3 shadow-md">
+                          <FileVideo className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold text-base mb-1">Download Video</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-2">
+                            <span>MP4 • HD Quality</span>
+                            {taskStatus.title && (
+                              <span className="text-primary/70">
+                                • {getFriendlyFileName('mp4').replace('.mp4', '')}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <code className="flex-1 truncate rounded bg-white px-2 py-1 text-[10px] text-blue-900 dark:bg-slate-900 dark:text-blue-100">
-                            {directDownloadUrl}
-                          </code>
-                        </div>
-                        <p className="mt-1 text-[10px] text-blue-600 dark:text-blue-400">
-                          Click the buttons above to copy or open the direct download link
-                        </p>
                       </div>
-                    )}
-                  </>
-                )}
+                      <Download className="h-5 w-5 text-primary/70" />
+                    </div>
+                  </Button>
+                  
+                  {/* Direct Download Link - Compact */}
+                  {directDownloadUrl && (
+                    <div className="mt-3 pt-3 border-t border-primary/20 flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs hover:bg-primary/10"
+                        onClick={copyDirectUrl}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy Link
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs hover:bg-primary/10"
+                        onClick={openDirectUrl}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Open
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {/* Translated SRT - Only show when completed */}
-              {taskStatus.status === 'completed' &&
-                taskStatus.subtitleTranslated && (
+              {/* Subtitle Downloads - Compact Icon Grid */}
+              {taskStatus.subtitleRaw && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                    <FileText className="h-3 w-3" />
+                    Original Subtitles
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-blue-50 dark:bg-slate-900/50 dark:hover:bg-blue-950/30 border-blue-200 dark:border-blue-800"
+                      onClick={() =>
+                        downloadSRT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('srt', 'original').replace('.srt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                        <Type className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">SRT</div>
+                        <div className="text-[10px] text-muted-foreground">Standard</div>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-emerald-50 dark:bg-slate-900/50 dark:hover:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+                      onClick={() =>
+                        downloadTXT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('txt', 'text').replace('.txt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900/30 p-2">
+                        <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">TXT</div>
+                        <div className="text-[10px] text-muted-foreground">Plain Text</div>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-purple-50 dark:bg-slate-900/50 dark:hover:bg-purple-950/30 border-purple-200 dark:border-purple-800"
+                      onClick={() =>
+                        downloadVTT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('vtt', 'webvtt').replace('.vtt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2">
+                        <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">VTT</div>
+                        <div className="text-[10px] text-muted-foreground">Web Format</div>
+                      </div>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Translated Subtitle - Show when completed */}
+              {taskStatus.status === 'completed' && taskStatus.subtitleTranslated && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                    <Sparkles className="h-3 w-3" />
+                    Translated Subtitles ({taskStatus.targetLang?.toUpperCase()})
+                  </div>
                   <Button
                     variant="outline"
-                    className="w-full justify-start bg-white hover:bg-primary/5 dark:bg-slate-950"
+                    className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-950/30 dark:hover:to-emerald-950/30"
                     onClick={() =>
                       downloadSRT(
                         taskStatus.subtitleTranslated!,
-                        `translated-subtitle-${taskStatus.id}-${taskStatus.targetLang}.srt`
+                        getFriendlyFileName('srt', `translated_${taskStatus.targetLang}`).replace('.srt', '')
                       )
                     }
                   >
-                    <FileText className="mr-2 h-4 w-4 text-green-500" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs">Translated SRT</span>
+                    <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2 mr-3">
+                      <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-sm font-semibold">Translated SRT</span>
                       <span className="text-[10px] text-muted-foreground">
-                        AI Translated
+                        AI Translated • {taskStatus.targetLang?.toUpperCase()}
                       </span>
                     </div>
+                    <Download className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </Button>
-                )}
+                </div>
+              )}
 
               {/* CSV Export */}
               {(taskStatus.subtitleRaw || taskStatus.subtitleTranslated) && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white hover:bg-primary/5 dark:bg-slate-950"
-                  onClick={exportToCSV}
-                >
-                  <FileText className="mr-2 h-4 w-4 text-purple-500" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-xs">Export CSV</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      All Data
-                    </span>
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-white/50 hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
+                    onClick={exportToCSV}
+                  >
+                    <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2 mr-3">
+                      <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-sm font-semibold">Export CSV</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Complete metadata & subtitles
+                      </span>
+                    </div>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* AI Rewrite Center - Show when extracted or completed */}
+        {(taskStatus?.status === 'extracted' || taskStatus?.status === 'completed') &&
+          taskStatus?.subtitleRaw && (
+          <div className="mt-6 rounded-xl border border-slate-200 bg-gradient-to-br from-purple-50/80 to-blue-50/50 p-6 dark:from-purple-900/30 dark:to-blue-900/20 dark:border-slate-800 shadow-lg">
+            <AIRewriteCenter
+              taskId={taskStatus.id}
+              originalText={taskStatus.subtitleRaw || ''}
+              rewrittenText={(taskStatus as any).subtitleRewritten || undefined}
+              title={taskStatus.title}
+              author={taskStatus.author}
+            />
+          </div>
+        )}
+
+        {/* Download Buttons Section - Enhanced UI with friendly filenames */}
+        {(taskStatus?.status === 'extracted' || taskStatus?.status === 'completed') && (
+          <div className="mt-6 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-slate-100/50 p-6 dark:from-slate-900/50 dark:to-slate-800/30 dark:border-slate-800 shadow-lg">
+            <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-primary/10 p-2 dark:bg-primary/20">
+                  <Download className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Available Resources</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Click to download in your preferred format
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
+                {taskStatus.status}
+              </Badge>
+            </div>
+
+            <div className="space-y-4">
+              {/* Video Download - Primary Action (if video output) */}
+              {taskStatus.outputType === 'video' && taskStatus.videoUrlInternal && (
+                <div className="rounded-lg border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/20">
+                  <Button
+                    onClick={handleVideoDownload}
+                    className="w-full h-auto p-0 bg-transparent hover:bg-transparent"
+                    variant="ghost"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-4">
+                        <div className="rounded-xl bg-primary p-3 shadow-md">
+                          <FileVideo className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold text-base mb-1">Download Video</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-2">
+                            <span>MP4 • HD Quality</span>
+                            {taskStatus.title && (
+                              <span className="text-primary/70">
+                                • {getFriendlyFileName('mp4').replace('.mp4', '')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Download className="h-5 w-5 text-primary/70" />
+                    </div>
+                  </Button>
+                  
+                  {/* Direct Download Link - Compact */}
+                  {directDownloadUrl && (
+                    <div className="mt-3 pt-3 border-t border-primary/20 flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs hover:bg-primary/10"
+                        onClick={copyDirectUrl}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy Link
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs hover:bg-primary/10"
+                        onClick={openDirectUrl}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Open
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Subtitle Downloads - Compact Icon Grid */}
+              {taskStatus.subtitleRaw && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                    <FileText className="h-3 w-3" />
+                    Original Subtitles
                   </div>
-                </Button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-blue-50 dark:bg-slate-900/50 dark:hover:bg-blue-950/30 border-blue-200 dark:border-blue-800"
+                      onClick={() =>
+                        downloadSRT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('srt', 'original').replace('.srt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                        <Type className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">SRT</div>
+                        <div className="text-[10px] text-muted-foreground">Standard</div>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-emerald-50 dark:bg-slate-900/50 dark:hover:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+                      onClick={() =>
+                        downloadTXT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('txt', 'text').replace('.txt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900/30 p-2">
+                        <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">TXT</div>
+                        <div className="text-[10px] text-muted-foreground">Plain Text</div>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-3 flex flex-col items-center gap-2 bg-white/50 hover:bg-purple-50 dark:bg-slate-900/50 dark:hover:bg-purple-950/30 border-purple-200 dark:border-purple-800"
+                      onClick={() =>
+                        downloadVTT(
+                          taskStatus.subtitleRaw!,
+                          getFriendlyFileName('vtt', 'webvtt').replace('.vtt', '')
+                        )
+                      }
+                    >
+                      <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2">
+                        <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs font-semibold">VTT</div>
+                        <div className="text-[10px] text-muted-foreground">Web Format</div>
+                      </div>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Translated Subtitle - Show when completed */}
+              {taskStatus.status === 'completed' && taskStatus.subtitleTranslated && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                    <Sparkles className="h-3 w-3" />
+                    Translated Subtitles ({taskStatus.targetLang?.toUpperCase()})
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-950/30 dark:hover:to-emerald-950/30"
+                    onClick={() =>
+                      downloadSRT(
+                        taskStatus.subtitleTranslated!,
+                        getFriendlyFileName('srt', `translated_${taskStatus.targetLang}`).replace('.srt', '')
+                      )
+                    }
+                  >
+                    <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2 mr-3">
+                      <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-sm font-semibold">Translated SRT</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        AI Translated • {taskStatus.targetLang?.toUpperCase()}
+                      </span>
+                    </div>
+                    <Download className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </Button>
+                </div>
+              )}
+
+              {/* CSV Export */}
+              {(taskStatus.subtitleRaw || taskStatus.subtitleTranslated) && (
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-white/50 hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
+                    onClick={exportToCSV}
+                  >
+                    <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2 mr-3">
+                      <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-sm font-semibold">Export CSV</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Complete metadata & subtitles
+                      </span>
+                    </div>
+                  </Button>
+                </div>
               )}
             </div>
             
@@ -1026,21 +1682,45 @@ export function MediaExtractor({
           </div>
         )}
 
-        {/* Progress Bar */}
+        {/* Progress Bar with Dynamic Status and Creator Tips */}
         {isPolling && taskStatus && (
-          <div className="space-y-2">
+          <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 {taskStatus.status === 'translating'
-                  ? 'Translation Progress'
-                  : 'Extraction Progress'}
+                  ? t('extractor.progress.translation')
+                  : t('extractor.progress.extraction')}
               </span>
               <span className="font-medium">{taskStatus.progress || 0}%</span>
             </div>
             <Progress value={taskStatus.progress || 0} />
-            <p className="text-xs text-muted-foreground">
-              {getProgressText()}
-            </p>
+            
+            {/* Dynamic Status with Icon */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg">{dynamicStatus.currentIcon}</span>
+              <p className="text-xs text-muted-foreground flex-1">
+                {getProgressText()}
+              </p>
+            </div>
+            
+            {/* Creator Tips Card - Rotating educational content */}
+            {isPolling && (taskStatus.status === 'processing' || taskStatus.status === 'translating' || taskStatus.status === 'pending') && (
+              <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-4 dark:from-primary/10 dark:to-primary/5">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-full bg-primary/10 p-2 dark:bg-primary/20">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-primary/60 font-bold">
+                      Creator Tip
+                    </p>
+                    <p className="text-xs text-muted-foreground italic leading-relaxed">
+                      "{dynamicStatus.currentTip}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

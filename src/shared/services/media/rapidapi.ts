@@ -61,7 +61,7 @@ export function getRapidAPIServiceWithConfigs(
       backupHost:
         process.env.RAPIDAPI_YOUTUBE_TRANSCRIPT_BACKUP_HOST ||
         configs.rapidapi_host_youtube_transcript_backup ||
-        'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com',
+        'ai-youtube-transcript-generator-free-online-api-flux.p.rapidapi.com',
     },
     // YouTube 视频下载 - 主备配置
     youtubeVideo: {
@@ -86,7 +86,7 @@ export function getRapidAPIServiceWithConfigs(
     hostYouTubeTranscript:
       process.env.NEXT_PUBLIC_RAPIDAPI_HOST_YOUTUBE_TRANSCRIPT ||
       configs.rapidapi_host_youtube_transcript ||
-      'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com',
+      'ai-youtube-transcript-generator-free-online-api-flux.p.rapidapi.com',
     hostYouTubeDownload:
       process.env.NEXT_PUBLIC_RAPIDAPI_HOST_YOUTUBE_DOWNLOAD ||
       configs.rapidapi_host_youtube_download ||

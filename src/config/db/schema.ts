@@ -579,6 +579,7 @@ export const mediaTasks = pgTable(
     // New fields: subtitle text content
     subtitleRaw: text('subtitle_raw'), // original language subtitle text (SRT format)
     subtitleTranslated: text('subtitle_translated'), // translated subtitle text (SRT format)
+    subtitleRewritten: text('subtitle_rewritten'), // AI rewritten content (for viral scripts)
     // New fields: video storage
     videoUrlInternal: text('video_url_internal'), // R2 storage object key (e.g., videos/tiktok_12345.mp4)
     expiresAt: timestamp('expires_at'), // 24-hour expiration time (NULL for non-video tasks)

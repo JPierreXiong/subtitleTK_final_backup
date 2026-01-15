@@ -25,5 +25,10 @@
       "maxDuration": 180
     }
   },
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/media/cleanup-storage",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

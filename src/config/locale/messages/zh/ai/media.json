@@ -54,7 +54,92 @@
       "ar": "阿拉伯语",
       "hi": "印地语"
     },
-    "cost_info": "* 费用：每次请求 10-15 积分（提取 10 积分，视频下载或翻译 15 积分）"
+    "cost_info": "* 费用：每次请求 10-15 积分（提取 10 积分，视频下载或翻译 15 积分）",
+    "status": {
+      "pending": "提交任务中...",
+      "processing": "提取媒体中...",
+      "extracted": "提取完成！",
+      "translating": "翻译字幕中...",
+      "completed": "翻译完成！",
+      "failed": "失败"
+    },
+    "progress": {
+      "extraction": "提取进度",
+      "translation": "翻译进度"
+    },
+    "rewrite": {
+      "title": "AI 爆款改写中心",
+      "subtitle": "让 AI 帮你重构爆款脚本",
+      "status": {
+        "generating": "生成中...",
+        "saved": "已保存",
+        "completed": "已完成",
+        "pending": "待开始"
+      },
+      "styles": {
+        "tiktok": "TikTok 爆款",
+        "youtube": "YouTube 精华",
+        "redbook": "小红书种草",
+        "emotional": "情感共鸣",
+        "script": "专业分镜"
+      },
+      "custom_requirement": {
+        "label": "自定义改写需求 (可选)",
+        "placeholder": "输入你的特定改写要求，Gemini 将为您深度定制...",
+        "example": "例如：改成幽默吐槽风 / 增加更多 Emoji",
+        "quick_tags": {
+          "more_humorous": "更幽默点",
+          "shorter": "缩短篇幅",
+          "more_professional": "增加专业感",
+          "more_emojis": "加入更多 Emoji",
+          "question_style": "改成疑问句风格",
+          "stronger_cta": "强化结尾 CTA"
+        },
+        "reset": "重置",
+        "char_count": "{current}/{max}",
+        "start_rewrite": "开始改写",
+        "rewrite_with_requirement": "按要求改写"
+      },
+      "actions": {
+        "copy": "复制到剪贴板",
+        "copy_success": "已复制到剪贴板",
+        "copy_failed": "复制失败",
+        "export_txt": "导出为 TXT",
+        "export_srt": "导出为 SRT",
+        "export_success": "已导出为 {format} 格式",
+        "hide_original": "隐藏",
+        "show_original": "查看",
+        "original_text": "原文"
+      }
+    },
+    "dynamic_status": {
+      "extraction": {
+        "stage_0": "正在建立安全连接...",
+        "stage_1": "正在解析视频元数据与轨道...",
+        "stage_2": "正在调度全球分布式 API 资源...",
+        "stage_3": "正在利用神经网络提取音频特征...",
+        "stage_4": "正在通过 Gemini 2.5 构思爆款文案...",
+        "stage_5": "正在进行最后的格式校验与输出..."
+      },
+      "translation": {
+        "stage_0": "正在连接 Gemini AI 引擎...",
+        "stage_1": "正在深度解析原片语义...",
+        "stage_2": "正在重构黄金 3 秒钩子...",
+        "stage_3": "正在注入爆款网感词汇...",
+        "stage_4": "正在优化行动呼吁(CTA)...",
+        "stage_5": "即将完成，正在封装数据..."
+      },
+      "tips": {
+        "tip_1": "你知道吗？TikTok 视频的前 3 秒决定了 80% 的完播率，这就是为什么我们正在为你强化 Hook。",
+        "tip_2": "研究表明，带疑问句的标题比陈述句点击率高出 33%。",
+        "tip_3": "黄金脚本公式 = 钩子(Hook) + 价值(Value) + 行动(CTA)。",
+        "tip_4": "使用 Gemini 2.5 语义分析，我们能更精准地捕捉原视频中的情绪转折点。",
+        "tip_5": "适当使用 Emoji 可以提升 15% 的阅读愉悦感，让你的文案更具亲和力。",
+        "tip_6": "短视频的黄金时长通常在 7-15 秒，确保你的内容节奏紧凑。",
+        "tip_7": "在标题中加入数字（如\"3个秘诀\"、\"5步搞定\"）能显著提高点击率。",
+        "tip_8": "利用热门话题标签（Hashtags）可以增加视频的曝光度，但不要过度堆砌。"
+      }
+    }
   }
 }
 

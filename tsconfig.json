@@ -47,6 +47,7 @@
     ".next",
     "out",
     "dist",
-    "worker"
+    "worker",
+    "processMediaTask完整代码.ts"
   ]
 }

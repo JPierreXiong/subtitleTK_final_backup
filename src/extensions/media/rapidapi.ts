@@ -523,7 +523,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Free API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
@@ -682,7 +682,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Paid API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
@@ -920,7 +920,9 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
+    // Increased timeout to 20 seconds for YouTube API (can be slow for long videos)
+    // Since we use waitUntil for async processing, longer timeout is safe
+    const FREE_API_TIMEOUT = 20000; // 20 seconds timeout
     const MIN_TRANSCRIPT_LENGTH = 300; // Minimum transcript length (characters)
     
     // 使用配置中的主 API Host（从环境变量读取）
@@ -1021,7 +1023,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Free API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
@@ -1033,7 +1035,7 @@ export class RapidAPIProvider {
   }
 
   /**
-   * Fetch YouTube transcript via Paid API (Youtube Transcripts)
+   * Fetch YouTube transcript via Paid API (Free API: AI YouTube Transcript Generator)
    * Only called once per request (as fallback)
    * @param url YouTube video URL
    * @returns Result with transcript data or failure reason
@@ -1047,13 +1049,16 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
+    // Increased timeout to 20 seconds for YouTube API (can be slow for long videos)
+    // Since we use waitUntil for async processing, longer timeout is safe
+    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
     
     // 使用配置中的备 API Host（从环境变量读取）
+    // 新免费 API: ai-youtube-transcript-generator-free-online-api-flux.p.rapidapi.com
     const host = this.configs.youtubeTranscript?.backupHost || 
                  this.configs.hostYouTubeTranscript || 
-                 'youtube-transcripts-transcribe-youtube-video-to-text.p.rapidapi.com';
-    const apiUrl = `https://${host}/transcribe`;
+                 'ai-youtube-transcript-generator-free-online-api-flux.p.rapidapi.com';
+    const apiUrl = `https://${host}/transcript`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -1063,7 +1068,11 @@ export class RapidAPIProvider {
           'x-rapidapi-key': this.configs.apiKey,
           'x-rapidapi-host': host,
         },
-        body: JSON.stringify({ url }),
+        // 新 API 使用 videoUrl 和 langCode 参数
+        body: JSON.stringify({ 
+          videoUrl: url,
+          langCode: 'en' // 默认英语，可以根据需要调整或自动检测
+        }),
         signal: AbortSignal.timeout(PAID_API_TIMEOUT),
       });
 
@@ -1079,7 +1088,13 @@ export class RapidAPIProvider {
       const data = await response.json();
 
       // 业务层面失败判断
-      const transcription = data.transcription || '';
+      // 新 API 可能返回的字段：transcript, transcription, text, content
+      const transcription = 
+        data.transcript || 
+        data.transcription || 
+        data.text || 
+        data.content || 
+        '';
       const errorMsg = data.error || data.message || '';
 
       if (!transcription || transcription.trim().length === 0) {
@@ -1134,7 +1149,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Paid API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
@@ -1197,7 +1212,9 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
+    // Increased timeout to 20 seconds for TikTok API (can be slow for some videos)
+    // Since we use waitUntil for async processing, longer timeout is safe
+    const FREE_API_TIMEOUT = 20000; // 20 seconds timeout
     const MIN_TRANSCRIPT_LENGTH = 100; // Minimum transcript length (characters) - TikTok videos are usually shorter
     
     // 使用配置中的主 API Host（从环境变量读取）
@@ -1308,7 +1325,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Free API request timeout',
+          message: 'TikTok API request timeout. The API may be slow. Please try again.',
         };
       }
       return {
@@ -1335,7 +1352,9 @@ export class RapidAPIProvider {
     reason?: string;
     message?: string;
   }> {
-    const PAID_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
+    // Increased timeout to 20 seconds for TikTok API (can be slow for some videos)
+    // Since we use waitUntil for async processing, longer timeout is safe
+    const PAID_API_TIMEOUT = 20000; // 20 seconds timeout
     
     // 使用配置中的备 API Host（从环境变量读取）
     // 付费API：tiktok-transcript.p.rapidapi.com（收费便宜）
@@ -1464,7 +1483,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Paid API request timeout',
+          message: 'TikTok API request timeout. The API may be slow. Please try again.',
         };
       }
       return {
@@ -1533,16 +1552,19 @@ export class RapidAPIProvider {
           '',
         likes:
           rawResponse.statistics?.digg_count ||
+          rawResponse.statistics?.likes ||
           rawResponse.digg_count ||
           rawResponse.likes ||
           0,
         views:
           rawResponse.statistics?.play_count ||
+          rawResponse.statistics?.views ||
           rawResponse.play_count ||
           rawResponse.views ||
           0,
         shares:
           rawResponse.statistics?.share_count ||
+          rawResponse.statistics?.shares ||
           rawResponse.share_count ||
           rawResponse.shares ||
           0,
@@ -1661,7 +1683,8 @@ export class RapidAPIProvider {
   }
 
   /**
-   * Fetch TikTok video download via Free API (Snap Video3)
+   * Fetch TikTok video download via Free API
+   * Supports multiple endpoints: tiktok-download-video1 (new) or snap-video3 (fallback)
    * Only called once per request
    * @param url TikTok video URL
    * @returns Result with video data or failure reason
@@ -1677,25 +1700,42 @@ export class RapidAPIProvider {
   }> {
     const FREE_API_TIMEOUT = 8000; // 8 seconds timeout (for Vercel Free tier)
     
-    // 使用配置中的主 API Host（从环境变量读取）
+    // 优先使用配置中的主 API Host（支持 tiktok-download-video1.p.rapidapi.com）
     const host = this.configs.tiktokVideo?.primaryHost || 
                  this.configs.hostTikTokDownload || 
-                 'snap-video3.p.rapidapi.com';
-    const apiUrl = `https://${host}/download`;
+                 'tiktok-download-video1.p.rapidapi.com';
+    
+    // 根据不同的API端点使用不同的URL和请求方式
+    // tiktok-download-video1 使用 "Download Video by URL" 端点
+    let apiUrl: string;
+    let method: string = 'POST';
+    let body: string | URLSearchParams;
+    let headers: Record<string, string> = {
+      'x-rapidapi-key': this.configs.apiKey,
+      'x-rapidapi-host': host,
+    };
 
-    try {
-      // Create form data with URL parameter
+    if (host.includes('tiktok-download-video1')) {
+      // 新端点：使用 "Download Video by URL" 端点
+      apiUrl = `https://${host}/download/video/by/url`;
       const formData = new URLSearchParams();
       formData.append('url', url);
+      body = formData.toString();
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    } else {
+      // 旧端点：snap-video3 或其他
+      apiUrl = `https://${host}/download`;
+      const formData = new URLSearchParams();
+      formData.append('url', url);
+      body = formData.toString();
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
 
+    try {
       const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-rapidapi-key': this.configs.apiKey,
-          'x-rapidapi-host': host,
-        },
-        body: formData.toString(),
+        method: method,
+        headers: headers,
+        body: body,
         signal: AbortSignal.timeout(FREE_API_TIMEOUT),
       });
 
@@ -1743,9 +1783,10 @@ export class RapidAPIProvider {
 
       // 数据层面失败判断
       // 尝试提取视频URL（可能在不同字段中）
+      // 支持 tiktok-download-video1 的响应格式：{ data: { play: "...", download_addr: "..." } }
       const videoUrl =
-        data.data?.play ||
-        data.data?.download_addr ||
+        data.data?.play ||                    // tiktok-download-video1 主要字段
+        data.data?.download_addr ||           // tiktok-download-video1 备用字段
         data.data?.video_url ||
         data.data?.video?.play ||
         data.data?.video?.download_addr ||
@@ -1795,7 +1836,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Free API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
@@ -1961,7 +2002,7 @@ export class RapidAPIProvider {
         return {
           success: false,
           reason: 'TIMEOUT',
-          message: 'Paid API request timeout',
+          message: 'YouTube API request timeout. The video may be too long or the API is slow. Please try again.',
         };
       }
       return {
